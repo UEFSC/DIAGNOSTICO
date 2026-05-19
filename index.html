@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Diagnóstica - Unidad Educativa Sagrado Corazón</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae0fd',
+                            300: '#7cc8fc',
+                            400: '#38acf8',
+                            500: '#0e91eb',
+                            600: '#0273ca',
+                            700: '#035ca3',
+                            800: '#074f87',
+                            900: '#0c4270',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        /* Ocultar barra de desplazamiento en modo seguro */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between antialiased font-sans">
+
+    <!-- Encabezado de la Institución -->
+    <header class="bg-white border-b border-slate-200 py-4 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-brand-200">
+                    SC
+                </div>
+                <div>
+                    <h1 class="text-xs md:text-sm font-extrabold text-brand-900 tracking-wider uppercase">Unidad Educativa Fiscomisional</h1>
+                    <h2 class="text-lg md:text-xl font-black text-slate-900 leading-tight">SAGRADO CORAZÓN</h2>
+                    <p class="text-[10px] text-slate-500 font-medium">"Instrumento privilegiado e insustituible de evangelización" • Esmeraldas</p>
+                </div>
+            </div>
+            <div class="text-center md:text-right flex flex-col items-center md:items-end gap-1">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-100">
+                    Período Lectivo 2026-2027
+                </span>
+                <p class="text-xs text-slate-400">Código AMIE: 08H00145</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8 flex flex-col justify-center items-center">
+        
+        <!-- PANTALLA 1: LOGIN / VERIFICACIÓN -->
+        <div id="screen-login" class="w-full max-w-3xl bg-white rounded-3xl border border-slate-200 shadow-xl p-8 md:p-12 transition-all duration-300">
+            <div class="text-center mb-8">
+                <span class="text-xs font-bold text-brand-600 tracking-widest uppercase bg-brand-50 px-3 py-1.5 rounded-lg">Evaluación Diagnóstica</span>
+                <h3 class="text-2xl font-extrabold text-slate-900 mt-3">Ingreso del Estudiante</h3>
+                <p class="text-slate-500 text-sm mt-1">Digita tu número de cédula para validar tu registro y empezar la prueba.</p>
+            </div>
+
+            <div class="space-y-6 max-w-md mx-auto">
+                <div>
+                    <label for="input-cedula" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Cédula de Identidad</label>
+                    <div class="relative">
+                        <input type="text" id="input-cedula" maxlength="10" placeholder="Escribe tu número de cédula" 
+                            class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-lg font-semibold tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all placeholder:text-slate-400 placeholder:tracking-normal">
+                    </div>
+                </div>
+
+                <div id="login-error" class="hidden bg-rose-50 border border-rose-100 text-rose-700 px-4 py-3 rounded-2xl text-sm font-medium flex items-center gap-2">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                    <span id="login-error-text">El número de cédula ingresado no consta en el registro escolar.</span>
+                </div>
+
+                <button onclick="verificarEstudiante()" 
+                    class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-brand-200 hover:shadow-xl transition-all flex items-center justify-center gap-2">
+                    <span>Validar y Registrar</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+
+            <!-- Botones de administración ocultos en el pie de ingreso -->
+            <div class="border-t border-slate-100 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-xs text-slate-400 text-center sm:text-left">Asignatura: <strong class="text-slate-600">Informática Aplicada</strong> • Docente: <strong class="text-slate-600">Ing. César Godoy Rosero, Mgt.</strong></p>
+                <button onclick="mostrarAccesoDocente()" class="text-xs font-bold text-brand-600 hover:text-brand-800 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    Acceso Docente
+                </button>
+            </div>
+        </div>
+
+        <!-- PANTALLA DE ACCESO DOCENTE (LOGIN) -->
+        <div id="screen-docente-login" class="hidden w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-xl p-8 transition-all duration-300">
+            <div class="text-center mb-6">
+                <span class="text-xs font-bold text-amber-600 tracking-widest uppercase bg-amber-50 px-3 py-1.5 rounded-lg">Módulo de Administración</span>
+                <h3 class="text-xl font-bold text-slate-900 mt-3">Autenticación de Gestión</h3>
+                <p class="text-slate-500 text-xs mt-1">Por seguridad, ingresa la clave de acceso docente.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label for="input-clave-docente" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Clave de Acceso</label>
+                    <input type="password" id="input-clave-docente" placeholder="••••••••" 
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-center font-mono text-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                </div>
+
+                <div id="docente-login-error" class="hidden bg-rose-50 border border-rose-100 text-rose-700 p-3 rounded-xl text-xs font-medium text-center">
+                    Clave incorrecta. Por favor, intente de nuevo.
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="volverAlInicio()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-all text-sm">
+                        Cancelar
+                    </button>
+                    <button onclick="validarAccesoDocente()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl shadow-md transition-all text-sm">
+                        Ingresar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANTALLA: PANEL DE CONTROL DOCENTE (ADMIN) -->
+        <div id="screen-docente-panel" class="hidden w-full bg-white rounded-3xl border border-slate-200 shadow-xl p-6 md:p-8 transition-all duration-300">
+            
+            <!-- Cabecera del Panel Docente -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-200 gap-4 mb-6">
+                <div>
+                    <span class="text-xs font-bold text-brand-600 tracking-widest uppercase bg-brand-50 px-3 py-1 rounded-md">Panel de Control Activo</span>
+                    <h3 class="text-2xl font-black text-slate-900 mt-1">Gestión de Evaluaciones BGU</h3>
+                    <p class="text-xs text-slate-500">Administración general de resultados, métricas y base de datos de estudiantes</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="exportarResultadosCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm flex items-center gap-1.5 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Exportar CSV (Excel)
+                    </button>
+                    <button onclick="cerrarSesionDocente()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        Salir del Panel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fila de Tarjetas de Métricas -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-slate-50 border border-slate-200/60 p-4 rounded-2xl">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Total Estudiantes</span>
+                    <p id="metric-total-est" class="text-2xl font-extrabold text-slate-800 mt-1">0</p>
+                    <span class="text-[10px] text-slate-400 block mt-1">Registrados en nómina</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-200/60 p-4 rounded-2xl">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Evaluados</span>
+                    <p id="metric-evaluados" class="text-2xl font-extrabold text-brand-600 mt-1">0</p>
+                    <span id="metric-evaluados-pct" class="text-[10px] text-brand-500 font-semibold block mt-1">0% del curso</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-200/60 p-4 rounded-2xl">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Promedio Curso</span>
+                    <p id="metric-promedio" class="text-2xl font-extrabold text-emerald-600 mt-1">0.00</p>
+                    <span class="text-[10px] text-emerald-500 font-semibold block mt-1">Escala sobre 10.00</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-200/60 p-4 rounded-2xl">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Aprobados (>= 7.00)</span>
+                    <p id="metric-aprobados" class="text-2xl font-extrabold text-blue-600 mt-1">0%</p>
+                    <span id="metric-aprobados-detalle" class="text-[10px] text-blue-500 font-semibold block mt-1">0 de 0 evaluados</span>
+                </div>
+            </div>
+
+            <!-- Tabs de navegación interna de administración -->
+            <div class="flex border-b border-slate-200 gap-6 mb-6">
+                <button onclick="switchAdminTab('calificaciones')" id="tab-btn-calificaciones" class="pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-700">
+                    Registro de Calificaciones
+                </button>
+                <button onclick="switchAdminTab('estudiantes')" id="tab-btn-estudiantes" class="pb-3 text-sm font-semibold text-slate-400 hover:text-slate-600">
+                    Nómina del Curso
+                </button>
+            </div>
+
+            <!-- CONTENIDO DE TAB: CALIFICACIONES -->
+            <div id="tab-content-calificaciones" class="space-y-6">
+                <!-- Barra de búsqueda e interacciones del listado -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="relative w-full sm:max-w-xs">
+                        <input type="text" id="input-buscar-calificacion" oninput="filtrarTablaCalificaciones()" placeholder="Buscar estudiante o cédula..." 
+                            class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="btn-simular" onclick="generarDataSimulada()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-3.5 rounded-xl border border-slate-200/60 transition-all">
+                            Simular Calificaciones
+                        </button>
+                        <button onclick="limpiarRegistros()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold py-2 px-3.5 rounded-xl border border-rose-200/40 transition-all">
+                            Borrar Historial
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabla de Resultados -->
+                <div class="border border-slate-100 rounded-2xl overflow-hidden bg-white">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-100">
+                                <tr>
+                                    <th class="p-4 w-12">No.</th>
+                                    <th class="p-4">Estudiante</th>
+                                    <th class="p-4">Cédula</th>
+                                    <th class="p-4">Fecha/Hora de Envío</th>
+                                    <th class="p-4 text-center">Respuestas Correctas</th>
+                                    <th class="p-4 text-right">Nota Final</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body-calificaciones" class="divide-y divide-slate-100">
+                                <!-- Dinámico -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="no-data-alert" class="hidden p-8 text-center text-slate-400">
+                        <svg class="w-10 h-10 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span>No existen registros de calificaciones ingresados en este momento.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENIDO DE TAB: NÓMINA (ADMINISTRABLE) -->
+            <div id="tab-content-estudiantes" class="hidden space-y-6">
+                <!-- Secciones de Gestión de Nómina -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Formulario de carga masiva -->
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4 lg:col-span-2">
+                        <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Importación Masiva (CSV / Excel / Texto)</h4>
+                        <p class="text-xs text-slate-500">Pega los datos de tus estudiantes en formato <code class="bg-slate-200 px-1 py-0.5 rounded font-mono">Cédula,Nombre y Apellido</code>. Ingresa un estudiante por línea para agregarlos a la base de datos de manera inmediata.</p>
+                        <textarea id="textarea-importar" rows="5" placeholder="Ejemplo:&#10;0850812348,ALAVA ORTIZ BERTHA ANAHIS&#10;1350673537,ALMEIDA MOREIRA XIOMARA RUBY" 
+                            class="w-full p-4 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"></textarea>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] text-amber-600 font-bold bg-amber-50 px-2.5 py-1.5 rounded-lg">※ Formato sugerido: Cédula,Nombre Completo</span>
+                            <button onclick="importarListaMasiva()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold py-2.5 px-5 rounded-xl shadow-md transition-all">
+                                Procesar e Importar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Agregar estudiante individual -->
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                        <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Agregar Individual</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Cédula</label>
+                                <input type="text" id="add-est-cedula" maxlength="10" placeholder="Escribe el número de cédula" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre Completo</label>
+                                <input type="text" id="add-est-nombre" placeholder="Ej. ALAVA ORTIZ BERTHA ANAHIS" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                            </div>
+                            <button onclick="agregarEstudianteIndividual()" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-all">
+                                Guardar Estudiante
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between border-t border-slate-100 pt-6">
+                    <p class="text-xs text-slate-400">Listado actual de estudiantes en sistema: <strong id="nomina-count" class="text-slate-700">0</strong></p>
+                    <button onclick="limpiarNominaCompleta()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold py-2 px-4 rounded-xl border border-rose-200/40 transition-all">
+                        Vaciar Nómina
+                    </button>
+                </div>
+
+                <!-- Tabla de Nómina -->
+                <div class="border border-slate-100 rounded-2xl overflow-hidden bg-white">
+                    <div class="overflow-x-auto max-h-[400px]">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-100 sticky top-0">
+                                <tr>
+                                    <th class="p-4 w-16">No.</th>
+                                    <th class="p-4">Nombre y Apellidos</th>
+                                    <th class="p-4">Identificación (Cédula)</th>
+                                    <th class="p-4">Estado</th>
+                                    <th class="p-4 text-center w-24">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body-estudiantes" class="divide-y divide-slate-100">
+                                <!-- Dinámico -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="no-students-alert" class="p-8 text-center text-slate-400">
+                        <svg class="w-10 h-10 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                        <span>La nómina de estudiantes se encuentra vacía. Por favor, importa o agrega estudiantes para permitir el acceso de evaluación.</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- PANTALLA 2: BIENVENIDA / INSTRUCCIONES -->
+        <div id="screen-welcome" class="hidden w-full bg-white rounded-3xl border border-slate-200 shadow-xl p-8 md:p-12 transition-all duration-300">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-brand-50 rounded-2xl mb-4">
+                    <svg class="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-400 uppercase tracking-wider text-xs">Bienvenido/a a la Evaluación</h3>
+                <h4 id="student-name" class="text-2xl font-black text-slate-900 mt-1">Estudiante</h4>
+                <div class="mt-4 flex flex-wrap gap-2 justify-center">
+                    <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">Curso: 2do BGU</span>
+                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold">Preguntas: 10</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4 mb-8">
+                <h5 class="font-bold text-slate-800 text-sm uppercase tracking-wide">Instrucciones Importantes:</h5>
+                <ul class="text-sm text-slate-600 space-y-2.5">
+                    <li class="flex items-start gap-2">
+                        <span class="text-brand-500 font-bold">•</span>
+                        <span>Lee atentamente cada pregunta antes de marcar tu respuesta definitiva.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-brand-500 font-bold">•</span>
+                        <span>La plataforma cuenta con medidas de seguridad integradas. <strong>No intentes recargar la página, cambiar de pestaña o abrir herramientas del sistema</strong>, ya que podrías invalidar tu progreso.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-brand-500 font-bold">•</span>
+                        <span>Una vez que comiences la prueba, no podrás pausarla ni salirte de ella. Al finalizar recibirás tu calificación definitiva.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <button onclick="comenzarEvaluacion()" 
+                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-200 hover:shadow-xl transition-all flex items-center justify-center gap-2">
+                <span>Comenzar Evaluación</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </button>
+        </div>
+
+        <!-- PANTALLA 3: CUESTIONARIO ACTIVO -->
+        <div id="screen-quiz" class="hidden w-full bg-white rounded-3xl border border-slate-200 shadow-xl p-6 md:p-10 transition-all duration-300">
+            <!-- Barra de Progreso y Datos Rápidos -->
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-4 pb-4 border-b border-slate-100">
+                <span class="font-semibold text-brand-600 uppercase" id="student-quiz-badge">Estudiante</span>
+                <span class="font-bold bg-slate-100 px-2 py-1 rounded-lg text-slate-600" id="question-progress">Pregunta 1 de 10</span>
+            </div>
+
+            <!-- Indicador Visual Lineal -->
+            <div class="w-full bg-slate-100 h-2 rounded-full mb-8 overflow-hidden">
+                <div id="progress-bar" class="bg-brand-500 h-full w-0 transition-all duration-300"></div>
+            </div>
+
+            <!-- Cuerpo de la Pregunta -->
+            <div id="question-container" class="space-y-6">
+                <h4 id="question-text" class="text-lg md:text-xl font-bold text-slate-900 leading-snug">Cargando pregunta...</h4>
+                
+                <!-- Opciones de Respuesta -->
+                <div id="options-container" class="space-y-3">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+
+            <!-- Controles de Navegación (Solo avanzar es permitido tras responder) -->
+            <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-slate-100">
+                <button id="btn-next" onclick="preguntaSiguiente()" 
+                    class="w-full sm:w-auto px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md shadow-brand-100 transition-all">
+                    Siguiente
+                </button>
+            </div>
+        </div>
+
+        <!-- PANTALLA 4: RESULTADO FINAL -->
+        <div id="screen-results" class="hidden w-full bg-white rounded-3xl border border-slate-200 shadow-xl p-8 md:p-12 text-center transition-all duration-300">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-50 rounded-full mb-6">
+                <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+
+            <span class="text-xs font-bold text-emerald-600 tracking-widest uppercase bg-emerald-50 px-3 py-1 rounded-lg">Evaluación Finalizada</span>
+            <h3 class="text-3xl font-extrabold text-slate-900 mt-4">¡Prueba Completada!</h3>
+            <p class="text-slate-500 text-sm mt-1 max-w-md mx-auto">Tus respuestas han sido procesadas correctamente y el registro ha sido guardado de manera exitosa en el sistema.</p>
+
+            <!-- Cuadro de Resultados -->
+            <div class="bg-slate-50 rounded-2xl border border-slate-100 p-6 my-8 max-w-sm mx-auto space-y-4">
+                <div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Estudiante</span>
+                    <p id="result-student-name" class="text-lg font-extrabold text-slate-800 leading-tight">Nombre del Estudiante</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200/60">
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">Curso / Paralelo</span>
+                        <p class="text-sm font-extrabold text-slate-700">2do BGU</p>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">Calificación</span>
+                        <p id="result-score" class="text-xl font-black text-brand-600">0.00 / 10</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nota Informativa -->
+            <div class="bg-amber-50 border border-amber-100 text-amber-800 px-4 py-3.5 rounded-2xl text-xs font-medium max-w-md mx-auto mb-6">
+                <strong>Nota:</strong> De acuerdo con la normativa de confidencialidad institucional, las respuestas correctas e incorrectas detalladas no podrán ser visualizadas para garantizar la seguridad del instrumento diagnóstico.
+            </div>
+
+            <button onclick="volverAlInicio()" 
+                class="bg-slate-800 hover:bg-slate-950 text-white font-bold py-3 px-8 rounded-xl transition-all">
+                Cerrar Sesión
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
+        <div class="max-w-5xl mx-auto px-4 space-y-2">
+            <p>© 2026 Unidad Educativa Fiscomisional Sagrado Corazón • Esmeraldas • Todos los derechos reservados.</p>
+            <p class="font-medium text-slate-300">Desarrollado y administrado de forma segura bajo la supervisión del área de Informática.</p>
+        </div>
+    </footer>
+
+    <!-- LOGICA / JAVASCRIPT CON CARGA DINÁMICA DE ESTUDIANTES -->
+    <script>
+        // 1. BASE DE DATOS DE ESTUDIANTES DINÁMICA (Cargada desde localStorage)
+        let estudiantes = [];
+
+        // 2. CUESTIONARIO DE LA EVALUACIÓN
+        const preguntas = [
+            {
+                pregunta: "1. ¿Cuál de las siguientes contraseñas cumple mejor con criterios de seguridad digital?",
+                opciones: [
+                    { id: "A", texto: "12345678" },
+                    { id: "B", texto: "contraseña2026" },
+                    { id: "C", texto: "Cg#89Lm!2x" },
+                    { id: "D", texto: "qwerty" }
+                ],
+                correcta: "C"
+            },
+            {
+                pregunta: "2. ¿Cuál es la principal función de la autenticación en seguridad digital?",
+                opciones: [
+                    { id: "A", texto: "Acelerar el acceso a páginas web" },
+                    { id: "B", texto: "Verificar la identidad del usuario" },
+                    { id: "C", texto: "Guardar contraseñas automáticamente" },
+                    { id: "D", texto: "Eliminar virus" }
+                ],
+                correcta: "B"
+            },
+            {
+                pregunta: "3. ¿Cuál de las siguientes prácticas representa un uso ético de la inteligencia artificial en educación?",
+                opciones: [
+                    { id: "A", texto: "Copiar tareas generadas por IA sin revisión" },
+                    { id: "B", texto: "Usar IA para generar ideas y luego analizarlas críticamente" },
+                    { id: "C", texto: "Presentar contenido de IA como propio sin citar" },
+                    { id: "D", texto: "Evitar el uso de IA completamente" }
+                ],
+                correcta: "B"
+            },
+            {
+                pregunta: "4. ¿Qué elemento NO es recomendable al crear una contraseña segura?",
+                opciones: [
+                    { id: "A", texto: "Uso de símbolos" },
+                    { id: "B", texto: "Combinación de letras y números" },
+                    { id: "C", texto: "Información personal (nombre, fecha de nacimiento)" },
+                    { id: "D", texto: "Longitud mayor a 8 caracteres" }
+                ],
+                correcta: "C"
+            },
+            {
+                pregunta: "5. ¿Cuál es la estructura básica de una página web?",
+                opciones: [
+                    { id: "A", texto: "Texto - Imagen - Video" },
+                    { id: "B", texto: "Inicio - Contenido - Navegación" },
+                    { id: "C", texto: "Archivo - Carpeta - Sistema" },
+                    { id: "D", texto: "Entrada - Proceso - Salida" }
+                ],
+                correcta: "B"
+            },
+            {
+                pregunta: "6. ¿Qué se entiende por organización de contenido digital?",
+                opciones: [
+                    { id: "A", texto: "Guardar archivos sin orden" },
+                    { id: "B", texto: "Diseñar solo con imágenes" },
+                    { id: "C", texto: "Estructurar información de manera clara y lógica" },
+                    { id: "D", texto: "Usar únicamente texto" }
+                ],
+                correcta: "C"
+            },
+            {
+                pregunta: "7. ¿Cuál de las siguientes acciones mejora la presentación de una página web?",
+                opciones: [
+                    { id: "A", texto: "Usar colores al azar" },
+                    { id: "B", texto: "No incluir títulos" },
+                    { id: "C", texto: "Mantener coherencia visual y jerarquía" },
+                    { id: "D", texto: "Colocar toda la información junta" }
+                ],
+                correcta: "C"
+            },
+            {
+                pregunta: "8. ¿Qué característica define una página web funcional?",
+                opciones: [
+                    { id: "A", texto: "Tiene solo texto" },
+                    { id: "B", texto: "No posee enlaces" },
+                    { id: "C", texto: "Permite navegar entre secciones correctamente" },
+                    { id: "D", texto: "Usa muchos colores" }
+                ],
+                correcta: "C"
+            },
+            {
+                pregunta: "9. ¿Cuál es el propósito del diseño digital básico?",
+                opciones: [
+                    { id: "A", texto: "Decorar sin intención" },
+                    { id: "B", texto: "Organizar y presentar información de forma atractiva" },
+                    { id: "C", texto: "Reducir el contenido" },
+                    { id: "D", texto: "Eliminar imágenes" }
+                ],
+                correcta: "B"
+            },
+            {
+                pregunta: "10. ¿Qué acción evidencia pensamiento crítico frente al uso de IA?",
+                opciones: [
+                    { id: "A", texto: "Copiar sin analizar" },
+                    { id: "B", texto: "Usar IA sin comprender resultados" },
+                    { id: "C", texto: "Evaluar y validar la información generada" },
+                    { id: "D", texto: "Evitar toda tecnología" }
+                ],
+                correcta: "C"
+            }
+        ];
+
+        // Variables de estado local
+        let estudianteActual = null;
+        let indicePreguntaActual = 0;
+        let respuestasEstudiante = {};
+        
+        // Clave maestra para ingresar como docente
+        const CLAVE_DOCENTE_MASTER = "Uesc2026.*"; 
+
+        // 3. SEGURIDAD COMPLETA ANTI-COPIA / CONTROL DE EXAMEN
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        document.addEventListener('keydown', function(e) {
+            // F12 (Consola de desarrollador)
+            if (e.key === 'F12') {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+I, Ctrl+Shift+C, Ctrl+Shift+J (Atajos de Inspección y Consola)
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c' || e.key === 'J' || e.key === 'j')) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+U (Ver código fuente)
+            if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+S (Intentar guardar la página localmente)
+            if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Detector de apertura de herramientas de desarrollo (Consola)
+        (function() {
+            const threshold = 160;
+            setInterval(function() {
+                if (window.outerWidth - window.innerWidth > threshold || 
+                    window.outerHeight - window.innerHeight > threshold) {
+                    console.clear();
+                }
+            }, 1000);
+        })();
+
+        // Inicializar carga de base de datos local al arrancar la app
+        window.addEventListener('load', () => {
+            if (!localStorage.getItem('calificaciones_2c')) {
+                localStorage.setItem('calificaciones_2c', JSON.stringify([]));
+            }
+            cargarNominaDesdeStorage();
+        });
+
+        // Carga y sincronización de estudiantes
+        function cargarNominaDesdeStorage() {
+            estudiantes = JSON.parse(localStorage.getItem('estudiantes_registrados_dinamicos')) || [];
+            document.getElementById('nomina-count').innerText = estudiantes.length;
+            
+            // Si la nómina está vacía, deshabilitar simulación
+            const btnSim = document.getElementById('btn-simular');
+            if (estudiantes.length === 0) {
+                btnSim.disabled = true;
+                btnSim.classList.add('opacity-40', 'cursor-not-allowed');
+            } else {
+                btnSim.disabled = false;
+                btnSim.classList.remove('opacity-40', 'cursor-not-allowed');
+            }
+        }
+
+        // Guardar nómina en localStorage
+        function guardarNominaEnStorage() {
+            localStorage.setItem('estudiantes_registrados_dinamicos', JSON.stringify(estudiantes));
+            cargarNominaDesdeStorage();
+        }
+
+        // 4. FUNCIONES DE INTERFAZ Y CONTROL
+
+        // Pantalla 1: Verificar Cédula (Lógica inteligente con soporte de ceros eliminados)
+        function verificarEstudiante() {
+            const inputCedula = document.getElementById('input-cedula').value.trim();
+            const errorDiv = document.getElementById('login-error');
+            const errorText = document.getElementById('login-error-text');
+            
+            if (estudiantes.length === 0) {
+                errorText.innerText = "La nómina de estudiantes está vacía. El docente debe cargar alumnos primero.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Buscar coincidencia exacta o numérica
+            const match = estudiantes.find(est => {
+                const dbCedula = est.cedula.trim();
+                const cleanInput = inputCedula;
+                return (
+                    dbCedula === cleanInput ||
+                    dbCedula === "0" + cleanInput ||
+                    "0" + dbCedula === cleanInput ||
+                    parseInt(dbCedula, 10) === parseInt(cleanInput, 10)
+                );
+            });
+
+            if (match) {
+                estudianteActual = match;
+                errorDiv.classList.add('hidden');
+                
+                // Configurar datos en pantalla de bienvenida
+                document.getElementById('student-name').innerText = estudianteActual.nombre;
+                
+                // Ir a la pantalla de bienvenida
+                mostrarPantalla('screen-welcome');
+            } else {
+                errorText.innerText = "El número de cédula ingresado no consta en el registro escolar activo.";
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        // Pantalla 2: Iniciar Examen
+        function comenzarEvaluacion() {
+            indicePreguntaActual = 0;
+            respuestasEstudiante = {};
+            
+            // Configurar barra lateral e inicial
+            document.getElementById('student-quiz-badge').innerText = estudianteActual.nombre;
+            
+            mostrarPregunta();
+            mostrarPantalla('screen-quiz');
+        }
+
+        // Renderizar la pregunta activa
+        function mostrarPregunta() {
+            const q = preguntas[indicePreguntaActual];
+            
+            // Actualizar textos de progreso
+            document.getElementById('question-progress').innerText = `Pregunta ${indicePreguntaActual + 1} de ${preguntas.length}`;
+            
+            // Actualizar barra de progreso visual
+            const pct = ((indicePreguntaActual + 1) / preguntas.length) * 100;
+            document.getElementById('progress-bar').style.width = `${pct}%`;
+
+            // Imprimir texto de la pregunta
+            document.getElementById('question-text').innerText = q.pregunta;
+
+            // Renderizar las opciones
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            q.opciones.forEach(opcion => {
+                const seleccionada = respuestasEstudiante[indicePreguntaActual] === opcion.id;
+                
+                const card = document.createElement('div');
+                card.className = `border p-4 rounded-2xl cursor-pointer transition-all flex items-center gap-4 ${
+                    seleccionada 
+                    ? 'border-brand-500 bg-brand-50/50 ring-2 ring-brand-500/10' 
+                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                }`;
+                card.onclick = () => seleccionarOpcion(opcion.id);
+
+                // Checkbox circular de selección
+                const circle = document.createElement('div');
+                circle.className = `w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ${
+                    seleccionada 
+                    ? 'border-brand-600 bg-brand-600 text-white' 
+                    : 'border-slate-300 bg-white'
+                }`;
+                if (seleccionada) {
+                    circle.innerHTML = `<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`;
+                }
+
+                const txt = document.createElement('span');
+                txt.className = `font-semibold text-sm ${seleccionada ? 'text-brand-900' : 'text-slate-700'}`;
+                txt.innerText = `${opcion.id}) ${opcion.texto}`;
+
+                card.appendChild(circle);
+                card.appendChild(txt);
+                container.appendChild(card);
+            });
+
+            const btnNext = document.getElementById('btn-next');
+            if (indicePreguntaActual === preguntas.length - 1) {
+                btnNext.innerText = "Finalizar Prueba";
+                btnNext.classList.remove('bg-brand-600', 'hover:bg-brand-700');
+                btnNext.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'shadow-emerald-100');
+            } else {
+                btnNext.innerText = "Siguiente";
+                btnNext.classList.add('bg-brand-600', 'hover:bg-brand-700');
+                btnNext.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'shadow-emerald-100');
+            }
+        }
+
+        // Selección de una opción de respuesta
+        function seleccionarOpcion(id) {
+            respuestasEstudiante[indicePreguntaActual] = id;
+            mostrarPregunta();
+        }
+
+        // Ir a la pregunta siguiente (o finalizar la prueba si es la última)
+        function preguntaSiguiente() {
+            // Obligar a responder la pregunta activa antes de continuar
+            if (!respuestasEstudiante[indicePreguntaActual]) {
+                mostrarAlertaRapida("Debes seleccionar una opción para poder continuar.");
+                return;
+            }
+
+            if (indicePreguntaActual < preguntas.length - 1) {
+                indicePreguntaActual++;
+                mostrarPregunta();
+            } else {
+                procesarResultadosYTerminar();
+            }
+        }
+
+        // Procesar puntaje final y cambiar de pantalla
+        function procesarResultadosYTerminar() {
+            let correctas = 0;
+
+            preguntas.forEach((q, index) => {
+                if (respuestasEstudiante[index] === q.correcta) {
+                    correctas++;
+                }
+            });
+
+            // Calificación sobre 10
+            const notaFinal = ((correctas / preguntas.length) * 10).toFixed(2);
+
+            // Guardar en Base de Datos Local
+            const nuevoRegistro = {
+                cedula: estudianteActual.cedula,
+                nombre: estudianteActual.nombre,
+                fecha: obtenerFechaHoraActual(),
+                correctas: correctas,
+                nota: parseFloat(notaFinal)
+            };
+
+            salvarCalificacionLocal(nuevoRegistro);
+
+            // Cargar datos del estudiante en la pantalla de resultados
+            document.getElementById('result-student-name').innerText = estudianteActual.nombre;
+            document.getElementById('result-score').innerText = `${notaFinal} / 10`;
+
+            mostrarPantalla('screen-results');
+        }
+
+        // Guardar resultado individualmente en localStorage previniendo duplicados
+        function salvarCalificacionLocal(registro) {
+            let historico = JSON.parse(localStorage.getItem('calificaciones_2c')) || [];
+            
+            // Eliminar si ya existía un registro de esta cédula para no duplicar datos
+            historico = historico.filter(item => parseInt(item.cedula, 10) !== parseInt(registro.cedula, 10));
+            
+            historico.push(registro);
+            localStorage.setItem('calificaciones_2c', JSON.stringify(historico));
+        }
+
+        // Auxiliar: Obtener formato ordenado de fecha y hora
+        function obtenerFechaHoraActual() {
+            const d = new Date();
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        }
+
+        // Reiniciar y regresar a pantalla de ingreso
+        function volverAlInicio() {
+            estudianteActual = null;
+            indicePreguntaActual = 0;
+            respuestasEstudiante = {};
+            document.getElementById('input-cedula').value = '';
+            document.getElementById('input-clave-docente').value = '';
+            document.getElementById('docente-login-error').classList.add('hidden');
+            mostrarPantalla('screen-login');
+        }
+
+        // Control de visibilidad de pantallas generales
+        function mostrarPantalla(idPantalla) {
+            const pantallas = ['screen-login', 'screen-welcome', 'screen-quiz', 'screen-results', 'screen-docente-login', 'screen-docente-panel'];
+            pantallas.forEach(p => {
+                const el = document.getElementById(p);
+                if (p === idPantalla) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+        }
+
+        // Mensaje flotante de alerta personalizado
+        function mostrarAlertaRapida(mensaje) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-5 py-3.5 rounded-xl shadow-lg z-50 transition-all duration-300";
+            toast.innerText = mensaje;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        // ==========================================
+        // SECCIÓN DE ADMINISTRACIÓN Y GESTIÓN DOCENTE
+        // ==========================================
+
+        function inicializarPanelDocente() {
+            actualizarMetricas();
+            switchAdminTab('calificaciones');
+            construirTablaEstudiantes();
+        }
+
+        function actualizarMetricas() {
+            const data = JSON.parse(localStorage.getItem('calificaciones_2c')) || [];
+            const totalEstudiantes = estudiantes.length;
+            const totalEvaluados = data.length;
+            const evaluadosPct = totalEstudiantes > 0 ? ((totalEvaluados / totalEstudiantes) * 100).toFixed(0) : 0;
+
+            // Calcular Promedio de Calificaciones
+            let suma = 0;
+            let aprobados = 0;
+            data.forEach(item => {
+                suma += item.nota;
+                if (item.nota >= 7.0) {
+                    aprobados++;
+                }
+            });
+
+            const promedio = totalEvaluados > 0 ? (suma / totalEvaluados).toFixed(2) : "0.00";
+            const aprobadosPct = totalEvaluados > 0 ? ((aprobados / totalEvaluados) * 100).toFixed(0) : 0;
+
+            // Renderizar métricas en pantalla
+            document.getElementById('metric-total-est').innerText = totalEstudiantes;
+            document.getElementById('metric-evaluados').innerText = totalEvaluados;
+            document.getElementById('metric-evaluados-pct').innerText = `${evaluadosPct}% de la nómina`;
+            
+            const promedioEl = document.getElementById('metric-promedio');
+            promedioEl.innerText = promedio;
+            if (parseFloat(promedio) >= 7.0) {
+                promedioEl.className = "text-2xl font-extrabold text-emerald-600 mt-1";
+            } else {
+                promedioEl.className = "text-2xl font-extrabold text-amber-500 mt-1";
+            }
+
+            document.getElementById('metric-aprobados').innerText = `${aprobadosPct}%`;
+            document.getElementById('metric-aprobados-detalle').innerText = `${aprobados} de ${totalEvaluados} aprobados`;
+
+            // Cargar datos a la tabla activa de calificaciones
+            construirTablaCalificaciones(data);
+        }
+
+        function construirTablaCalificaciones(calificacionesArray) {
+            const tbody = document.getElementById('table-body-calificaciones');
+            const noData = document.getElementById('no-data-alert');
+            tbody.innerHTML = '';
+
+            if (calificacionesArray.length === 0) {
+                noData.classList.remove('hidden');
+                return;
+            }
+            noData.classList.add('hidden');
+
+            calificacionesArray.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-all font-medium";
+
+                const notaColor = item.nota >= 7.0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold';
+
+                tr.innerHTML = `
+                    <td class="p-4 text-slate-400 font-bold">${index + 1}</td>
+                    <td class="p-4 font-bold text-slate-800">${item.nombre}</td>
+                    <td class="p-4 text-slate-500 font-mono">${item.cedula}</td>
+                    <td class="p-4 text-slate-500">${item.fecha}</td>
+                    <td class="p-4 text-center text-slate-600">${item.correctas} / 10</td>
+                    <td class="p-4 text-right ${notaColor}">${item.nota.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Construye el listado de la nómina administrable
+        function construirTablaEstudiantes() {
+            const tbody = document.getElementById('table-body-estudiantes');
+            const noStudentsAlert = document.getElementById('no-students-alert');
+            tbody.innerHTML = '';
+
+            if (estudiantes.length === 0) {
+                noStudentsAlert.classList.remove('hidden');
+                return;
+            }
+            noStudentsAlert.classList.add('hidden');
+
+            const calificaciones = JSON.parse(localStorage.getItem('calificaciones_2c')) || [];
+
+            estudiantes.forEach((est, index) => {
+                const haRendido = calificaciones.some(c => {
+                    return parseInt(c.cedula, 10) === parseInt(est.cedula, 10);
+                });
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-all font-medium";
+
+                const badge = haRendido 
+                    ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Evaluado</span>`
+                    : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-100">Pendiente</span>`;
+
+                tr.innerHTML = `
+                    <td class="p-4 text-slate-400 font-bold">${index + 1}</td>
+                    <td class="p-4 font-bold text-slate-800">${est.nombre}</td>
+                    <td class="p-4 text-slate-500 font-mono">${est.cedula}</td>
+                    <td class="p-4">${badge}</td>
+                    <td class="p-4 text-center">
+                        <button onclick="eliminarEstudiante('${est.cedula}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs bg-rose-50 hover:bg-rose-100 px-2.5 py-1.5 rounded-lg transition-all">
+                            Eliminar
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Agregar estudiante de forma manual/individual
+        function agregarEstudianteIndividual() {
+            const cedula = document.getElementById('add-est-cedula').value.trim();
+            const nombre = document.getElementById('add-est-nombre').value.trim().toUpperCase();
+
+            if (!cedula || !nombre) {
+                mostrarAlertaRapida("Por favor completa los campos de cédula y nombre.");
+                return;
+            }
+
+            if (estudiantes.some(est => est.cedula === cedula)) {
+                mostrarAlertaRapida("Esta cédula ya está registrada en la nómina.");
+                return;
+            }
+
+            estudiantes.push({ "cedula": cedula, "nombre": nombre });
+            guardarNominaEnStorage();
+            construirTablaEstudiantes();
+            actualizarMetricas();
+
+            // Limpiar inputs
+            document.getElementById('add-est-cedula').value = '';
+            document.getElementById('add-est-nombre').value = '';
+            mostrarAlertaRapida("Estudiante agregado exitosamente.");
+        }
+
+        // Importación masiva estructurada (Copia y pega desde Excel o CSV)
+        function importarListaMasiva() {
+            const rawText = document.getElementById('textarea-importar').value.trim();
+            if (!rawText) {
+                mostrarAlertaRapida("Pega o escribe datos antes de procesar.");
+                return;
+            }
+
+            const lineas = rawText.split('\n');
+            let importados = 0;
+            let omitidos = 0;
+
+            lineas.forEach(linea => {
+                // Separar por comas o tabuladores
+                let columnas = linea.includes('\t') ? linea.split('\t') : linea.split(',');
+                
+                if (columnas.length >= 2) {
+                    let cedulaRaw = columnas[0].trim();
+                    let nombreRaw = columnas[1].trim().toUpperCase();
+
+                    // Limpiar cédula de posibles comillas o espacios extras
+                    cedulaRaw = cedulaRaw.replace(/["']/g, "");
+
+                    if (cedulaRaw !== "" && nombreRaw !== "") {
+                        // Evitar duplicados
+                        if (!estudiantes.some(est => est.cedula === cedulaRaw)) {
+                            estudiantes.push({
+                                "cedula": cedulaRaw,
+                                "nombre": nombreRaw
+                            });
+                            importados++;
+                        } else {
+                            omitidos++;
+                        }
+                    }
+                }
+            });
+
+            if (importados > 0) {
+                guardarNominaEnStorage();
+                construirTablaEstudiantes();
+                actualizarMetricas();
+                document.getElementById('textarea-importar').value = '';
+                mostrarAlertaRapida(`¡Éxito! Se importaron ${importados} estudiantes. (Omitidos: ${omitidos})`);
+            } else {
+                mostrarAlertaRapida("No se procesó ningún registro nuevo. Verifica el formato.");
+            }
+        }
+
+        // Eliminar un estudiante individualmente
+        function eliminarEstudiante(cedula) {
+            if (confirm("¿Estás seguro de eliminar a este estudiante de la nómina? No se eliminarán sus registros de calificación previos.")) {
+                estudiantes = estudiantes.filter(est => est.cedula !== cedula);
+                guardarNominaEnStorage();
+                construirTablaEstudiantes();
+                actualizarMetricas();
+                mostrarAlertaRapida("Estudiante retirado de la nómina.");
+            }
+        }
+
+        // Limpiar toda la nómina de estudiantes en memoria activa
+        function limpiarNominaCompleta() {
+            if (confirm("¿Seguro que deseas vaciar por completo la nómina de estudiantes? Al hacerlo, ningún alumno podrá ingresar a rendir evaluaciones hasta que cargues nuevos datos.")) {
+                estudiantes = [];
+                guardarNominaEnStorage();
+                construirTablaEstudiantes();
+                actualizarMetricas();
+                mostrarAlertaRapida("Nómina vaciada correctamente.");
+            }
+        }
+
+        // Navegación de pestañas internas del Admin
+        function switchAdminTab(tab) {
+            const btnCal = document.getElementById('tab-btn-calificaciones');
+            const btnEst = document.getElementById('tab-btn-estudiantes');
+            const contentCal = document.getElementById('tab-content-calificaciones');
+            const contentEst = document.getElementById('tab-content-estudiantes');
+
+            if (tab === 'calificaciones') {
+                btnCal.className = "pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-700";
+                btnEst.className = "pb-3 text-sm font-semibold text-slate-400 hover:text-slate-600";
+                contentCal.classList.remove('hidden');
+                contentEst.classList.add('hidden');
+                actualizarMetricas();
+            } else {
+                btnEst.className = "pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-700";
+                btnCal.className = "pb-3 text-sm font-semibold text-slate-400 hover:text-slate-600";
+                contentEst.classList.remove('hidden');
+                contentCal.classList.add('hidden');
+                construirTablaEstudiantes();
+            }
+        }
+
+        // Filtrado dinámico en tiempo real
+        function filtrarTablaCalificaciones() {
+            const txt = document.getElementById('input-buscar-calificacion').value.toLowerCase();
+            const data = JSON.parse(localStorage.getItem('calificaciones_2c')) || [];
+            
+            const filtrados = data.filter(item => 
+                item.nombre.toLowerCase().includes(txt) || 
+                item.cedula.includes(txt)
+            );
+
+            construirTablaCalificaciones(filtrados);
+        }
+
+        // Exportación segura de resultados de curso a CSV compatible con Excel
+        function exportarResultadosCSV() {
+            const data = JSON.parse(localStorage.getItem('calificaciones_2c')) || [];
+            if (data.length === 0) {
+                mostrarAlertaRapida("No hay registros para exportar en este momento.");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM para acentos en Excel
+            csvContent += "Nro,Estudiante,Cedula,Fecha Registro,Correctas,Nota\n";
+
+            data.forEach((item, index) => {
+                csvContent += `${index + 1},"${item.nombre}","${item.cedula}","${item.fecha}",${item.correctas},${item.nota.toFixed(2)}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Reporte_Evaluacion_Diagnostica.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Simulación de ingreso de notas aleatorias para probar la interfaz de administración
+        function generarDataSimulada() {
+            if (estudiantes.length === 0) {
+                mostrarAlertaRapida("Sube estudiantes a la nómina antes de simular notas.");
+                return;
+            }
+
+            const dataSimulada = [];
+            // Tomar hasta 12 alumnos de la nómina para ilustrar la simulación
+            const seleccionados = estudiantes.slice(0, 12);
+            
+            seleccionados.forEach((est, index) => {
+                const correctas = Math.floor(Math.random() * 5) + 6; // Notas entre 6 y 10
+                const d = new Date();
+                d.setMinutes(d.getMinutes() - (15 * index));
+                const pad = (n) => n.toString().padStart(2, '0');
+                const fechaSim = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+                dataSimulada.push({
+                    cedula: est.cedula,
+                    nombre: est.nombre,
+                    fecha: fechaSim,
+                    correctas: correctas,
+                    nota: parseFloat(((correctas / 10) * 10).toFixed(2))
+                });
+            });
+
+            localStorage.setItem('calificaciones_2c', JSON.stringify(dataSimulada));
+            actualizarMetricas();
+            mostrarAlertaRapida("Calificaciones simuladas correctamente.");
+        }
+
+        // Borrado total de las notas rendidas (reset de prueba)
+        function limpiarRegistros() {
+            if (confirm("¿Está seguro de que desea eliminar permanentemente todas las calificaciones registradas? Esta acción no afectará tu nómina de estudiantes.")) {
+                localStorage.setItem('calificaciones_2c', JSON.stringify([]));
+                actualizarMetricas();
+                mostrarAlertaRapida("Historial de calificaciones purgado exitosamente.");
+            }
+        }
+
+        function mostrarAccesoDocente() {
+            mostrarPantalla('screen-docente-login');
+            document.getElementById('input-clave-docente').focus();
+        }
+
+        function validarAccesoDocente() {
+            const inputClave = document.getElementById('input-clave-docente').value;
+            const errorDiv = document.getElementById('docente-login-error');
+
+            if (inputClave === CLAVE_DOCENTE_MASTER) {
+                errorDiv.classList.add('hidden');
+                inicializarPanelDocente();
+                mostrarPantalla('screen-docente-panel');
+            } else {
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function cerrarSesionDocente() {
+            volverAlInicio();
+        }
+    </script>
+</body>
+</html>
