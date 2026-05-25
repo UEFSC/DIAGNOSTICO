@@ -33,27 +33,40 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            user-select: none;
+        /* Deshabilitar selección de texto global excepto en campos de entrada de datos */
+        * {
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
+            user-select: none;
+            outline: none;
         }
-        /* Ocultar barra de desplazamiento en modo seguro */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        input, textarea, select {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between antialiased font-sans">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between antialiased font-sans font-medium">
+
+    <!-- Pantalla de bloqueo absoluto por seguridad institucional (Intento de inspección) -->
+    <div id="security-block-screen" class="hidden fixed inset-0 bg-rose-950 text-white z-[9999] flex flex-col items-center justify-center p-6 text-center backdrop-blur-md">
+        <div class="w-24 h-24 bg-rose-600 rounded-full flex items-center justify-center mb-6 animate-pulse">
+            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        </div>
+        <h2 class="text-3xl font-black tracking-tight">ACCESO DENEGADO</h2>
+        <p class="text-rose-200 text-sm mt-3 max-w-lg leading-relaxed">
+            Se ha detectado un intento de inspección de código o apertura de herramientas de desarrollo. Por políticas estrictas de seguridad de la Unidad Educativa Fiscomisional Sagrado Corazón y probidad académica, su sesión ha sido bloqueada. El reporte de este suceso ha sido registrado en la base de datos permanente con su identificador de red.
+        </p>
+        <button onclick="window.location.reload()" class="mt-8 px-6 py-3 bg-white text-rose-900 font-extrabold rounded-xl text-xs hover:bg-slate-100 transition-all uppercase tracking-wider">
+            Reintentar Acceso Seguro
+        </button>
+    </div>
 
     <!-- Encabezado de la Institución -->
-    <header class="bg-white border-b border-slate-200 py-4 shadow-sm">
+    <header id="main-header" class="bg-white border-b border-slate-200 py-4 shadow-sm">
         <div class="max-w-5xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-brand-200">
@@ -101,7 +114,7 @@
                 <button onclick="verificarEstudiante()" 
                     class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-brand-200 hover:shadow-xl transition-all flex items-center justify-center gap-2">
                     <span>Validar y Registrar</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7"></path></svg>
                 </button>
             </div>
 
@@ -149,30 +162,42 @@
         <div id="screen-docente-panel" class="hidden w-full bg-white rounded-3xl border border-slate-200 shadow-xl p-6 md:p-8 transition-all duration-300">
             
             <!-- Cabecera del Panel Docente -->
-            <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-200 gap-4 mb-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-6 border-b border-slate-200 gap-4 mb-6">
                 <div>
                     <span class="text-xs font-bold text-brand-600 tracking-widest uppercase bg-brand-50 px-3 py-1 rounded-md">Panel de Control Activo</span>
                     <h3 class="text-2xl font-black text-slate-900 mt-1">Gestión de Evaluaciones BGU</h3>
-                    <p class="text-xs text-slate-500">Administración general de resultados, métricas y base de datos de estudiantes</p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="text-xs text-slate-500 font-bold">Filtro Activo de Consulta:</span>
+                        <select id="select-filtro-curso" onchange="cambiarFiltroCursoParalelo()" class="px-2 py-1 bg-brand-50 border border-brand-200 text-brand-700 text-xs rounded-lg font-bold focus:outline-none animate-fade-in">
+                            <!-- Inyectado dinámicamente -->
+                        </select>
+                        <select id="select-filtro-paralelo" onchange="cambiarFiltroCursoParalelo()" class="px-2 py-1 bg-brand-50 border border-brand-200 text-brand-700 text-xs rounded-lg font-bold focus:outline-none animate-fade-in">
+                            <!-- Inyectado dinámicamente -->
+                        </select>
+                    </div>
                 </div>
                 <div class="flex flex-wrap gap-2">
+                    <button onclick="abrirReportePedagogicoIA()" class="bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md flex items-center gap-1.5 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l3.245-1.127 1.54 1.54M21 3l-3.245 1.127-1.54-1.54L13.25 5.5l1.54 1.54L10 12h2.5l-1.5 5 9.5-9.5H18.5L21 3z"></path></svg>
+                        ✨ Analizar Diagnóstico con IA
+                    </button>
                     <button onclick="exportarResultadosCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm flex items-center gap-1.5 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Exportar CSV (Excel)
+                        Exportar CSV
                     </button>
                     <button onclick="cerrarSesionDocente()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold py-2.5 px-4 rounded-xl flex items-center gap-1.5 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        Salir del Panel
+                        Salir
                     </button>
                 </div>
             </div>
 
-            <!-- Fila de Tarjetas de Métricas -->
+            <!-- Fila de Tarjetas de Métricas de Filtro Específico -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <div class="bg-slate-50 border border-slate-200/60 p-4 rounded-2xl">
                     <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Total Estudiantes</span>
                     <p id="metric-total-est" class="text-2xl font-extrabold text-slate-800 mt-1">0</p>
-                    <span class="text-[10px] text-slate-400 block mt-1">Registrados en nómina</span>
+                    <span class="text-[10px] text-slate-400 block mt-1" id="sub-metric-total-desc">Registrados en nómina</span>
                 </div>
                 <div class="bg-slate-50 border border-slate-200/60 p-4 rounded-2xl">
                     <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Evaluados</span>
@@ -180,7 +205,7 @@
                     <span id="metric-evaluados-pct" class="text-[10px] text-brand-500 font-semibold block mt-1">0% del curso</span>
                 </div>
                 <div class="bg-slate-50 border border-slate-200/60 p-4 rounded-2xl">
-                    <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Promedio Curso</span>
+                    <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Promedio General</span>
                     <p id="metric-promedio" class="text-2xl font-extrabold text-emerald-600 mt-1">0.00</p>
                     <span class="text-[10px] text-emerald-500 font-semibold block mt-1">Escala sobre 10.00</span>
                 </div>
@@ -193,7 +218,7 @@
 
             <!-- Tabs de navegación interna de administración -->
             <div class="flex border-b border-slate-200 gap-6 mb-6">
-                <button onclick="switchAdminTab('calificaciones')" id="tab-btn-calificaciones" class="pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-700">
+                <button onclick="switchAdminTab('calificaciones')" id="tab-btn-calificaciones" class="pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-700 font-bold">
                     Registro de Calificaciones
                 </button>
                 <button onclick="switchAdminTab('estudiantes')" id="tab-btn-estudiantes" class="pb-3 text-sm font-semibold text-slate-400 hover:text-slate-600">
@@ -207,14 +232,14 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="relative w-full sm:max-w-xs">
                         <input type="text" id="input-buscar-calificacion" oninput="filtrarTablaCalificaciones()" placeholder="Buscar estudiante o cédula..." 
-                            class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                            class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 font-medium font-medium">
                         <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
                     <div class="flex gap-2">
-                        <button id="btn-simular" onclick="generarDataSimulada()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-3.5 rounded-xl border border-slate-200/60 transition-all">
+                        <button id="btn-simular" onclick="generarDataSimulada()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 px-3.5 rounded-xl border border-slate-200/60 transition-all font-semibold font-semibold font-semibold font-semibold font-semibold">
                             Simular Calificaciones
                         </button>
-                        <button onclick="limpiarRegistros()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold py-2 px-3.5 rounded-xl border border-rose-200/40 transition-all">
+                        <button onclick="limpiarRegistros()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold py-2 px-3.5 rounded-xl border border-rose-200/40 transition-all font-bold">
                             Borrar Historial
                         </button>
                     </div>
@@ -229,55 +254,139 @@
                                     <th class="p-4 w-12">No.</th>
                                     <th class="p-4">Estudiante</th>
                                     <th class="p-4">Cédula</th>
+                                    <th class="p-4">Curso / Paralelo</th>
                                     <th class="p-4">Fecha/Hora de Envío</th>
                                     <th class="p-4 text-center">Respuestas Correctas</th>
                                     <th class="p-4 text-right">Nota Final</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-body-calificaciones" class="divide-y divide-slate-100">
+                            <tbody id="table-body-calificaciones" class="divide-y divide-slate-100 font-medium">
                                 <!-- Dinámico -->
                             </tbody>
                         </table>
                     </div>
-                    <div id="no-data-alert" class="hidden p-8 text-center text-slate-400">
+                    <div id="no-data-alert" class="hidden p-8 text-center text-slate-400 font-normal font-normal">
                         <svg class="w-10 h-10 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         <span>No existen registros de calificaciones ingresados en este momento.</span>
                     </div>
                 </div>
             </div>
 
-            <!-- CONTENIDO DE TAB: NÓMINA (ADMINISTRABLE) -->
+            <!-- CONTENIDO DE TAB: NÓMINA (ADMINISTRABLE CON LOS 9 CAMPOS REQUERIDOS + CURSO + PARALELO) -->
             <div id="tab-content-estudiantes" class="hidden space-y-6">
                 <!-- Secciones de Gestión de Nómina -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 font-semibold">
                     
-                    <!-- Formulario de carga masiva -->
+                    <!-- Formulario de carga masiva por medio de Archivo o Pegado -->
                     <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4 lg:col-span-2">
-                        <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Importación Masiva (CSV / Excel / Texto)</h4>
-                        <p class="text-xs text-slate-500">Pega los datos de tus estudiantes en formato <code class="bg-slate-200 px-1 py-0.5 rounded font-mono">Cédula,Nombre y Apellido</code>. Ingresa un estudiante por línea para agregarlos a la base de datos de manera inmediata.</p>
-                        <textarea id="textarea-importar" rows="5" placeholder="Ejemplo:&#10;0850812348,ALAVA ORTIZ BERTHA ANAHIS&#10;1350673537,ALMEIDA MOREIRA XIOMARA RUBY" 
-                            class="w-full p-4 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"></textarea>
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] text-amber-600 font-bold bg-amber-50 px-2.5 py-1.5 rounded-lg">※ Formato sugerido: Cédula,Nombre Completo</span>
-                            <button onclick="importarListaMasiva()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold py-2.5 px-5 rounded-xl shadow-md transition-all">
-                                Procesar e Importar
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wide font-bold">Importación de Datos Estudiantiles</h4>
+                            <button onclick="descargarPlantillaCSV()" class="text-[10px] font-bold text-brand-600 hover:text-brand-800 flex items-center gap-1 font-bold">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Descargar Plantilla Ejemplo
                             </button>
                         </div>
+                        
+                        <!-- Cargar por Archivo -->
+                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-4 bg-white hover:border-brand-400 transition-all text-center relative">
+                            <input type="file" id="file-import-nomina" accept=".csv, .txt" onchange="importarArchivoNomina(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                            <div class="space-y-1">
+                                <svg class="w-8 h-8 text-slate-400 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                <p class="text-xs font-bold text-slate-700">Haz clic aquí para seleccionar o arrastra tu archivo CSV / Texto (.csv, .txt)</p>
+                                <p class="text-[10px] text-slate-400">Debe contener las columnas separadas por comas o punto y coma</p>
+                            </div>
+                        </div>
+
+                        <!-- O pegar en formato texto plano -->
+                        <details class="group border border-slate-200 rounded-xl bg-white">
+                            <summary class="flex justify-between items-center p-3 text-xs font-bold text-slate-700 cursor-pointer hover:bg-slate-50 transition-all">
+                                <span>O pegar datos manualmente en formato de texto</span>
+                                <span class="transition group-open:rotate-180">
+                                    <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="p-4 border-t border-slate-100 space-y-3">
+                                <textarea id="textarea-importar" rows="4" placeholder="Ord,Nómina,Cédula,Fecha Nac,Correo Institucional,Nombre Representante,Cédula R,Cel.Representante,Observaciones" 
+                                    class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"></textarea>
+                                <div class="flex justify-end">
+                                    <button onclick="importarListaMasiva()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold py-2.5 px-5 rounded-xl shadow-md transition-all">
+                                        Procesar Datos Pegados
+                                    </button>
+                                </div>
+                            </div>
+                        </details>
                     </div>
 
-                    <!-- Agregar estudiante individual -->
-                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
-                        <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Agregar Individual</h4>
-                        <div class="space-y-3">
+                    <!-- Agregar estudiante individual con todos los datos requeridos -->
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4 max-h-[460px] overflow-y-auto no-scrollbar font-semibold">
+                        <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wide font-bold font-bold font-bold font-bold font-bold">Agregar Individual</h4>
+                        <div class="space-y-3 font-semibold text-slate-700">
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Cédula</label>
-                                <input type="text" id="add-est-cedula" maxlength="10" placeholder="Escribe el número de cédula" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nómina (Nombre Completo)</label>
+                                <input type="text" id="add-est-nombre" placeholder="Ej. ALAVA ORTIZ BERTHA ANAHIS" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 text-slate-850">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Curso o Grado</label>
+                                    <select id="add-est-curso" class="w-full px-3 py-2.5 border border-slate-200 bg-white rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 text-slate-800 font-bold">
+                                        <option value="1do.">1do.</option>
+                                        <option value="2do">2do</option>
+                                        <option value="3ro.">3ro.</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Paralelo</label>
+                                    <select id="add-est-paralelo" class="w-full px-3 py-2.5 border border-slate-200 bg-white rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 text-slate-800 font-bold">
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                        <option value="D">D</option>
+                                        <option value="E">E</option>
+                                        <option value="F">F</option>
+                                        <option value="G">G</option>
+                                        <option value="H">H</option>
+                                        <option value="I">I</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Cédula del Estudiante</label>
+                                    <input type="text" id="add-est-cedula" maxlength="10" placeholder="Ej. 0850812348" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fecha Nac.</label>
+                                    <input type="date" id="add-est-fecha-nac" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                </div>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre Completo</label>
-                                <input type="text" id="add-est-nombre" placeholder="Ej. ALAVA ORTIZ BERTHA ANAHIS" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Correo Institucional</label>
+                                <input type="email" id="add-est-correo" placeholder="alavaortiz8141@sagradocorazon.edu.ec" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
                             </div>
-                            <button onclick="agregarEstudianteIndividual()" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-all">
+                            <div class="border-t border-slate-200 my-2 pt-2">
+                                <span class="text-[10px] font-bold text-brand-600 block mb-2 font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold">DATOS DEL REPRESENTANTE:</span>
+                                <div class="space-y-3 font-semibold">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre Representante</label>
+                                        <input type="text" id="add-est-rep-nombre" placeholder="Ej. ORTIZ MINA YIMMABEL ROCIO" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 font-semibold font-semibold font-semibold">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Cédula R.</label>
+                                            <input type="text" id="add-est-rep-cedula" maxlength="10" placeholder="Ej. 0802348219" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Celular Rep.</label>
+                                            <input type="text" id="add-est-rep-celular" maxlength="10" placeholder="Ej. 0996313327" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Observaciones</label>
+                                <textarea id="add-est-observaciones" placeholder="Escribe observaciones o detalles si es necesario" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-500"></textarea>
+                            </div>
+                            <button onclick="agregarEstudianteIndividual()" class="w-full bg-slate-800 hover:bg-slate-950 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-all font-bold font-bold font-bold font-bold">
                                 Guardar Estudiante
                             </button>
                         </div>
@@ -285,33 +394,41 @@
                 </div>
 
                 <div class="flex items-center justify-between border-t border-slate-100 pt-6">
-                    <p class="text-xs text-slate-400">Listado actual de estudiantes en sistema: <strong id="nomina-count" class="text-slate-700">0</strong></p>
-                    <button onclick="limpiarNominaCompleta()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold py-2 px-4 rounded-xl border border-rose-200/40 transition-all">
+                    <p class="text-xs text-slate-400" id="label-nomina-resumen">Listado actual de estudiantes en sistema: <strong id="nomina-count" class="text-slate-700 font-bold">0</strong></p>
+                    <button onclick="limpiarNominaCompleta()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold py-2 px-4 rounded-xl border border-rose-200/40 transition-all font-bold">
                         Vaciar Nómina
                     </button>
                 </div>
 
-                <!-- Tabla de Nómina -->
+                <!-- Tabla de Nómina en el mismo orden de los campos de Excel -->
                 <div class="border border-slate-100 rounded-2xl overflow-hidden bg-white">
-                    <div class="overflow-x-auto max-h-[400px]">
-                        <table class="w-full text-left text-xs">
+                    <div class="overflow-x-auto max-h-[500px]">
+                        <table class="w-full text-left text-xs whitespace-nowrap font-semibold font-semibold font-semibold">
                             <thead class="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-100 sticky top-0">
                                 <tr>
-                                    <th class="p-4 w-16">No.</th>
-                                    <th class="p-4">Nombre y Apellidos</th>
-                                    <th class="p-4">Identificación (Cédula)</th>
-                                    <th class="p-4">Estado</th>
-                                    <th class="p-4 text-center w-24">Acción</th>
+                                    <th class="p-4 w-12 font-bold font-bold font-bold font-bold">No.</th>
+                                    <th class="p-4 font-bold">Nómina (Estudiante)</th>
+                                    <th class="p-4 font-bold">Curso</th>
+                                    <th class="p-4 font-bold">Paralelo</th>
+                                    <th class="p-4 font-bold font-mono">Cédula</th>
+                                    <th class="p-4 font-bold">Fecha Nac</th>
+                                    <th class="p-4 font-bold">Correo Institucional</th>
+                                    <th class="p-4 font-bold">Nombre Representante</th>
+                                    <th class="p-4 font-bold font-mono">Cédula R.</th>
+                                    <th class="p-4 font-bold">Cel. Representante</th>
+                                    <th class="p-4 font-bold">Observaciones</th>
+                                    <th class="p-4 font-bold text-center">Estado</th>
+                                    <th class="p-4 font-bold text-center w-24">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-body-estudiantes" class="divide-y divide-slate-100">
+                            <tbody id="table-body-estudiantes" class="divide-y divide-slate-100 font-medium">
                                 <!-- Dinámico -->
                             </tbody>
                         </table>
                     </div>
-                    <div id="no-students-alert" class="p-8 text-center text-slate-400">
+                    <div id="no-students-alert" class="p-8 text-center text-slate-400 font-normal">
                         <svg class="w-10 h-10 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                        <span>La nómina de estudiantes se encuentra vacía. Por favor, importa o agrega estudiantes para permitir el acceso de evaluación.</span>
+                        <span>La nómina de estudiantes se encuentra vacía. Por favor, importa un archivo o agrega estudiantes para permitir el acceso de evaluación.</span>
                     </div>
                 </div>
             </div>
@@ -324,17 +441,17 @@
                 <div class="inline-flex items-center justify-center w-16 h-16 bg-brand-50 rounded-2xl mb-4">
                     <svg class="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <h3 class="text-xl font-bold text-slate-400 uppercase tracking-wider text-xs">Bienvenido/a a la Evaluación</h3>
+                <h3 class="text-xl font-bold text-slate-400 uppercase tracking-wider text-xs font-bold">Bienvenido/a a la Evaluación</h3>
                 <h4 id="student-name" class="text-2xl font-black text-slate-900 mt-1">Estudiante</h4>
                 <div class="mt-4 flex flex-wrap gap-2 justify-center">
-                    <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">Curso: 2do BGU</span>
+                    <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold" id="welcome-student-curso">Curso: 2do BGU</span>
                     <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold">Preguntas: 10</span>
                 </div>
             </div>
 
             <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4 mb-8">
                 <h5 class="font-bold text-slate-800 text-sm uppercase tracking-wide">Instrucciones Importantes:</h5>
-                <ul class="text-sm text-slate-600 space-y-2.5">
+                <ul class="text-sm text-slate-600 space-y-2.5 font-semibold">
                     <li class="flex items-start gap-2">
                         <span class="text-brand-500 font-bold">•</span>
                         <span>Lee atentamente cada pregunta antes de marcar tu respuesta definitiva.</span>
@@ -351,7 +468,7 @@
             </div>
 
             <button onclick="comenzarEvaluacion()" 
-                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-200 hover:shadow-xl transition-all flex items-center justify-center gap-2">
+                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-200 hover:shadow-xl transition-all flex items-center justify-center gap-2 font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold">
                 <span>Comenzar Evaluación</span>
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </button>
@@ -375,7 +492,7 @@
                 <h4 id="question-text" class="text-lg md:text-xl font-bold text-slate-900 leading-snug">Cargando pregunta...</h4>
                 
                 <!-- Opciones de Respuesta -->
-                <div id="options-container" class="space-y-3">
+                <div id="options-container" class="space-y-3 font-semibold">
                     <!-- Dinámico -->
                 </div>
             </div>
@@ -383,7 +500,7 @@
             <!-- Controles de Navegación (Solo avanzar es permitido tras responder) -->
             <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-slate-100">
                 <button id="btn-next" onclick="preguntaSiguiente()" 
-                    class="w-full sm:w-auto px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md shadow-brand-100 transition-all">
+                    class="w-full sm:w-auto px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md shadow-brand-100 transition-all font-bold font-bold font-bold font-bold font-bold font-bold">
                     Siguiente
                 </button>
             </div>
@@ -408,170 +525,297 @@
                 <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200/60">
                     <div>
                         <span class="text-[10px] text-slate-400 uppercase font-bold">Curso / Paralelo</span>
-                        <p class="text-sm font-extrabold text-slate-700">2do BGU</p>
+                        <p class="text-sm font-extrabold text-slate-700" id="result-student-curso">2do BGU</p>
                     </div>
                     <div>
                         <span class="text-[10px] text-slate-400 uppercase font-bold">Calificación</span>
-                        <p id="result-score" class="text-xl font-black text-brand-600">0.00 / 10</p>
+                        <p id="result-score" class="text-xl font-black text-brand-600 font-mono font-bold">0.00 / 10</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Nota Informativa -->
-            <div class="bg-amber-50 border border-amber-100 text-amber-800 px-4 py-3.5 rounded-2xl text-xs font-medium max-w-md mx-auto mb-6">
-                <strong>Nota:</strong> De acuerdo con la normativa de confidencialidad institucional, las respuestas correctas e incorrectas detalladas no podrán ser visualizadas para garantizar la seguridad del instrumento diagnóstico.
+            <!-- Bloque de Reporte Detallado de Preguntas (Bloqueado/Desbloqueado dinámicamente) -->
+            <div id="reporte-detallado-container" class="mt-6 text-left max-w-2xl mx-auto hidden font-medium">
+                <h4 class="text-sm font-black text-slate-900 uppercase tracking-wider mb-4 border-b border-slate-200 pb-2 flex items-center justify-between font-bold font-bold font-bold font-bold">
+                    <span>Revisión de la Evaluación</span>
+                    <span class="text-[10px] px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-md">General Completado</span>
+                </h4>
+                <div id="reporte-preguntas-lista" class="space-y-4">
+                    <!-- Respuestas de preguntas inyectadas dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Mensaje de bloqueo en espera de resultados generales -->
+            <div id="reporte-bloqueado-mensaje" class="bg-amber-50 border border-amber-100 text-amber-800 px-4 py-3.5 rounded-2xl text-xs font-medium max-w-md mx-auto mb-6">
+                <strong>Nota:</strong> Tu calificación ha sido registrada. Podrás acceder a la revisión de preguntas correctas e incorrectas una vez que todos los estudiantes de la nómina hayan rendido la prueba.
             </div>
 
             <button onclick="volverAlInicio()" 
-                class="bg-slate-800 hover:bg-slate-950 text-white font-bold py-3 px-8 rounded-xl transition-all">
+                class="bg-slate-800 hover:bg-slate-950 text-white font-bold py-3 px-8 rounded-xl transition-all font-bold">
                 Cerrar Sesión
             </button>
         </div>
 
     </main>
 
+    <!-- FICHA COMPLETA / DETALLES ESTUDIANTE (MODAL DE LOS 10 CAMPOS ACTUALIZADOS) -->
+    <div id="details-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-200 font-medium">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-8 shadow-2xl border border-slate-200 flex flex-col gap-4 font-bold">
+            <div class="border-b border-slate-200 pb-3 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-bold">
+                        ✨
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-slate-900 font-bold">Tutor Virtual ✨ IA</h4>
+                        <p class="text-[10px] text-violet-600 font-bold bg-violet-50 px-1.5 py-0.5 rounded">Asesoría de Refuerzo</p>
+                    </div>
+                </div>
+                <button onclick="cerrarTutorIA()" class="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 p-1 rounded-lg transition-all font-bold">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Panel de Conversación -->
+            <div class="space-y-3 text-xs md:text-sm text-slate-700 leading-relaxed font-medium">
+                <div id="ai-tutor-loader" class="flex flex-col items-center justify-center py-8 gap-2">
+                    <div class="w-8 h-8 border-3 border-violet-100 border-t-violet-600 rounded-full animate-spin"></div>
+                    <p class="text-[11px] text-slate-500 font-semibold animate-pulse">Conectando con el Tutor de Informática...</p>
+                </div>
+                <div id="ai-tutor-dialog" class="hidden p-4 bg-slate-50 rounded-2xl border border-slate-150 text-slate-800 max-h-[300px] overflow-y-auto no-scrollbar whitespace-pre-wrap font-semibold leading-relaxed font-semibold">
+                    <!-- Identificación dinámica de la duda -->
+                </div>
+            </div>
+
+            <div class="flex justify-end border-t border-slate-100 pt-3">
+                <button onclick="cerrarTutorIA()" class="px-4 py-2 bg-slate-800 hover:bg-slate-950 text-white font-bold rounded-xl text-xs shadow-md transition-all font-bold">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FICHA DETALLES MODAL -->
+    <div id="details-modal-student" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-200">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-8 shadow-2xl border border-slate-200 flex flex-col gap-6 max-h-[90vh] overflow-y-auto no-scrollbar font-medium font-medium">
+            <div class="flex justify-between items-start border-b border-slate-150 pb-4">
+                <div>
+                    <span class="text-[10px] uppercase font-bold text-brand-600 tracking-wider bg-brand-50 px-2.5 py-1 rounded-md">Ficha Detallada del Estudiante</span>
+                    <h4 id="detail-nombre" class="text-lg md:text-xl font-black text-slate-900 mt-2">ALAVA ORTIZ BERTHA ANAHIS</h4>
+                </div>
+                <button onclick="cerrarFichaDetalles()" class="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 p-1.5 rounded-xl transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
+                <!-- Datos Académicos y Personales -->
+                <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/50">
+                    <h5 class="font-bold text-slate-800 uppercase tracking-wider text-[10px] text-brand-600 font-bold">Datos Personales y de Acceso</h5>
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">Cédula del Estudiante</span>
+                        <p id="detail-cedula" class="font-semibold text-slate-800 font-mono text-sm mt-0.5">-</p>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">Curso / Paralelo</span>
+                        <p id="detail-curso-paralelo" class="font-semibold text-slate-800 mt-0.5 text-sm">-</p>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">Fecha de Nacimiento</span>
+                        <p id="detail-fecha-nac" class="font-semibold text-slate-800 text-sm mt-0.5">-</p>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">Correo Institucional</span>
+                        <p id="detail-correo" class="font-semibold text-slate-800 mt-0.5 truncate text-sm">-</p>
+                    </div>
+                </div>
+
+                <!-- Datos del Representante -->
+                <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/50">
+                    <h5 class="font-bold text-slate-800 uppercase tracking-wider text-[10px] text-brand-600 font-bold">Representación Familiar</h5>
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">Nombre del Representante</span>
+                        <p id="detail-rep-nombre" class="font-semibold text-slate-800 text-sm mt-0.5">-</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <span class="text-[10px] text-slate-400 uppercase font-bold">Cédula R.</span>
+                            <p id="detail-rep-cedula" class="font-semibold text-slate-800 font-mono mt-0.5">-</p>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 uppercase font-bold">Celular Rep.</span>
+                            <p id="detail-rep-celular" class="font-semibold text-slate-800 font-mono mt-0.5">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observaciones -->
+            <div class="bg-amber-50/50 p-4 rounded-2xl border border-amber-100 text-xs font-semibold">
+                <span class="text-[10px] text-amber-600 uppercase font-bold tracking-wide font-bold">Observaciones / Antecedentes</span>
+                <p id="detail-observaciones" class="text-slate-700 mt-1 whitespace-pre-wrap font-semibold leading-relaxed"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- VENTANA MODAL DE CURSO Y PARALELO (REQUISITO PREVIO DE IMPORTACIÓN - SE REEMPLAZARON LOS INPUTS POR SELECTS CON LA LISTA RESTRINGIDA) -->
+    <div id="course-setup-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-200">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 flex flex-col gap-4 font-medium font-medium">
+            <div class="border-b border-slate-100 pb-3">
+                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wide font-bold">Configuración del Curso / Paralelo de Carga</h4>
+                <p class="text-[11px] text-slate-500 mt-1">Especifique bajo qué curso y paralelo desea clasificar este lote de estudiantes si no viene asignado individualmente en el archivo.</p>
+            </div>
+            <div class="space-y-4 py-2">
+                <div>
+                    <label for="setup-curso" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Curso o Grado por defecto</label>
+                    <select id="setup-curso" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all font-semibold text-slate-800">
+                        <option value="1do.">1do.</option>
+                        <option value="2do">2do</option>
+                        <option value="3ro.">3ro.</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="setup-paralelo" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Paralelo por defecto</label>
+                    <select id="setup-paralelo" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all font-semibold text-slate-800 font-bold">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                        <option value="F">F</option>
+                        <option value="G">G</option>
+                        <option value="H">H</option>
+                        <option value="I">I</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 border-t border-slate-100 pt-3">
+                <button onclick="cancelarConfiguracionCurso()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all font-medium">Cancelar</button>
+                <button onclick="confirmarConfiguracionCurso()" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md transition-all font-bold">Confirmar e Importar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE REPORTE PEDAGÓGICO DE GEMINI (NUEVA FUNCIÓN DOCENTE IA) -->
+    <div id="ai-report-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-200 font-medium">
+        <div class="bg-white rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl border border-slate-200 flex flex-col gap-5 max-h-[85vh] overflow-y-auto no-scrollbar font-medium">
+            <div class="flex justify-between items-start border-b border-slate-200 pb-3">
+                <div>
+                    <span class="text-[10px] uppercase font-bold text-violet-600 tracking-wider bg-violet-50 px-2.5 py-1 rounded-md font-bold">Inteligencia Artificial Gemini</span>
+                    <h4 class="text-lg md:text-xl font-black text-slate-900 mt-2">Reporte de Análisis Pedagógico Inteligente</h4>
+                </div>
+                <button onclick="cerrarReportePedagogicoIA()" class="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200/60 p-1.5 rounded-xl transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <!-- Contenedor del análisis de IA -->
+            <div class="space-y-4 text-xs md:text-sm text-slate-700 leading-relaxed font-medium">
+                <div id="ai-report-loader" class="flex flex-col items-center justify-center py-12 gap-3">
+                    <!-- Spinner de carga -->
+                    <div class="w-12 h-12 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
+                    <p class="text-xs text-slate-500 font-semibold animate-pulse">Gemini está analizando los resultados del curso, identificando falencias y diseñando un plan de nivelación...</p>
+                </div>
+                <div id="ai-report-content" class="hidden whitespace-pre-line p-5 bg-violet-50/40 rounded-2xl border border-violet-100 text-slate-800 font-medium leading-relaxed font-bold">
+                    <!-- Inyección de texto del reporte de Gemini -->
+                </div>
+            </div>
+
+            <div class="flex justify-end border-t border-slate-100 pt-3 font-medium">
+                <button onclick="cerrarReportePedagogicoIA()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-950 text-white font-bold rounded-xl text-xs shadow-md transition-all font-bold">Cerrar Análisis</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUADRO DE DIÁLOGO / MODAL PERSONALIZADO -->
+    <div id="custom-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-200">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 flex flex-col gap-4 font-medium">
+            <div>
+                <h4 id="modal-title" class="text-base font-bold text-slate-950">Confirmación</h4>
+                <p id="modal-message" class="text-xs text-slate-500 mt-2">¿Estás seguro de continuar?</p>
+            </div>
+            <div class="flex justify-end gap-3 mt-2">
+                <button id="modal-btn-cancel" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all font-bold">Cancelar</button>
+                <button id="modal-btn-confirm" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-all font-bold">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400 font-medium">
         <div class="max-w-5xl mx-auto px-4 space-y-2">
             <p>© 2026 Unidad Educativa Fiscomisional Sagrado Corazón • Esmeraldas • Todos los derechos reservados.</p>
-            <p class="font-medium text-slate-300">Desarrollado y administrado de forma segura bajo la supervisión del área de Informática.</p>
+            <p class="font-medium text-slate-300 font-bold">Desarrollado y administrado de forma segura bajo la supervisión del área de Informática.</p>
         </div>
     </footer>
 
-    <!-- LOGICA / JAVASCRIPT CON CARGA DINÁMICA DE ESTUDIANTES -->
-    <script>
-        // 1. BASE DE DATOS DE ESTUDIANTES DINÁMICA (Cargada desde localStorage)
+    <!-- LÓGICA DE FIREBASE, ANTI-CHEAT Y CUESTIONARIO -->
+    <script type="module">
+        // Importación de módulos oficiales de Firebase (V11.6.1)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Configuración dinámica desde el entorno
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "placeholder",
+            authDomain: "placeholder",
+            projectId: "placeholder",
+            storageBucket: "placeholder",
+            messagingSenderId: "placeholder",
+            appId: "placeholder"
+        };
+        
+        // CORRECCIÓN CLAVE DE FIREBASE: Se introduce verificación robusta para evitar que cadenas vacías "" o espacios en blanco evadan el fallback a default-app-id
+        const appId = (typeof __app_id !== 'undefined' && __app_id && __app_id.trim() !== "") ? __app_id : 'default-app-id';
+
+        // Inicialización de servicios de Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Variables de estado global
         let estudiantes = [];
-
-        // 2. CUESTIONARIO DE LA EVALUACIÓN
-        const preguntas = [
-            {
-                pregunta: "1. ¿Cuál de las siguientes contraseñas cumple mejor con criterios de seguridad digital?",
-                opciones: [
-                    { id: "A", texto: "12345678" },
-                    { id: "B", texto: "contraseña2026" },
-                    { id: "C", texto: "Cg#89Lm!2x" },
-                    { id: "D", texto: "qwerty" }
-                ],
-                correcta: "C"
-            },
-            {
-                pregunta: "2. ¿Cuál es la principal función de la autenticación en seguridad digital?",
-                opciones: [
-                    { id: "A", texto: "Acelerar el acceso a páginas web" },
-                    { id: "B", texto: "Verificar la identidad del usuario" },
-                    { id: "C", texto: "Guardar contraseñas automáticamente" },
-                    { id: "D", texto: "Eliminar virus" }
-                ],
-                correcta: "B"
-            },
-            {
-                pregunta: "3. ¿Cuál de las siguientes prácticas representa un uso ético de la inteligencia artificial en educación?",
-                opciones: [
-                    { id: "A", texto: "Copiar tareas generadas por IA sin revisión" },
-                    { id: "B", texto: "Usar IA para generar ideas y luego analizarlas críticamente" },
-                    { id: "C", texto: "Presentar contenido de IA como propio sin citar" },
-                    { id: "D", texto: "Evitar el uso de IA completamente" }
-                ],
-                correcta: "B"
-            },
-            {
-                pregunta: "4. ¿Qué elemento NO es recomendable al crear una contraseña segura?",
-                opciones: [
-                    { id: "A", texto: "Uso de símbolos" },
-                    { id: "B", texto: "Combinación de letras y números" },
-                    { id: "C", texto: "Información personal (nombre, fecha de nacimiento)" },
-                    { id: "D", texto: "Longitud mayor a 8 caracteres" }
-                ],
-                correcta: "C"
-            },
-            {
-                pregunta: "5. ¿Cuál es la estructura básica de una página web?",
-                opciones: [
-                    { id: "A", texto: "Texto - Imagen - Video" },
-                    { id: "B", texto: "Inicio - Contenido - Navegación" },
-                    { id: "C", texto: "Archivo - Carpeta - Sistema" },
-                    { id: "D", texto: "Entrada - Proceso - Salida" }
-                ],
-                correcta: "B"
-            },
-            {
-                pregunta: "6. ¿Qué se entiende por organización de contenido digital?",
-                opciones: [
-                    { id: "A", texto: "Guardar archivos sin orden" },
-                    { id: "B", texto: "Diseñar solo con imágenes" },
-                    { id: "C", texto: "Estructurar información de manera clara y lógica" },
-                    { id: "D", texto: "Usar únicamente texto" }
-                ],
-                correcta: "C"
-            },
-            {
-                pregunta: "7. ¿Cuál de las siguientes acciones mejora la presentación de una página web?",
-                opciones: [
-                    { id: "A", texto: "Usar colores al azar" },
-                    { id: "B", texto: "No incluir títulos" },
-                    { id: "C", texto: "Mantener coherencia visual y jerarquía" },
-                    { id: "D", texto: "Colocar toda la información junta" }
-                ],
-                correcta: "C"
-            },
-            {
-                pregunta: "8. ¿Qué característica define una página web funcional?",
-                opciones: [
-                    { id: "A", texto: "Tiene solo texto" },
-                    { id: "B", texto: "No posee enlaces" },
-                    { id: "C", texto: "Permite navegar entre secciones correctamente" },
-                    { id: "D", texto: "Usa muchos colores" }
-                ],
-                correcta: "C"
-            },
-            {
-                pregunta: "9. ¿Cuál es el propósito del diseño digital básico?",
-                opciones: [
-                    { id: "A", texto: "Decorar sin intención" },
-                    { id: "B", texto: "Organizar y presentar información de forma atractiva" },
-                    { id: "C", texto: "Reducir el contenido" },
-                    { id: "D", texto: "Eliminar imágenes" }
-                ],
-                correcta: "B"
-            },
-            {
-                pregunta: "10. ¿Qué acción evidencia pensamiento crítico frente al uso de IA?",
-                opciones: [
-                    { id: "A", texto: "Copiar sin analizar" },
-                    { id: "B", texto: "Usar IA sin comprender resultados" },
-                    { id: "C", texto: "Evaluar y validar la información generada" },
-                    { id: "D", texto: "Evitar toda tecnología" }
-                ],
-                correcta: "C"
-            }
-        ];
-
-        // Variables de estado local
         let estudianteActual = null;
         let indicePreguntaActual = 0;
         let respuestasEstudiante = {};
-        
-        // Clave maestra para ingresar como docente
-        const CLAVE_DOCENTE_MASTER = "Uesc2026.*"; 
+        let user = null;
+        let calificacionesCargadas = [];
 
-        // 3. SEGURIDAD COMPLETA ANTI-COPIA / CONTROL DE EXAMEN
+        // Filtros de curso/grado y paralelo dinámicos (Se actualizan en base a base de datos y selectores)
+        let cursoFiltrado = "2do BGU";
+        let paraleloFiltrado = "C";
+
+        // Almacenamiento temporal para el proceso de importación
+        let archivoTemporal = null;
+        let importacionMasivaManualTemporal = false;
+
+        // Clave maestra para ingresar como docente
+        const CLAVE_DOCENTE_MASTER = "Uesc2026.*";
+
+        // ==============================================
+        // BLINDAJES DE SEGURIDAD EXTREMA (ANTI-INSPECCIÓN)
+        // ==============================================
+
+        // 1. Bloqueo de Clic Derecho (Menú Contextual)
         document.addEventListener('contextmenu', event => event.preventDefault());
 
+        // 2. Bloqueo de Atajos del Teclado (F12, Ctrl+U, Ctrl+S, Ctrl+P, Inspecciones)
         document.addEventListener('keydown', function(e) {
             // F12 (Consola de desarrollador)
-            if (e.key === 'F12') {
+            if (e.key === 'F12' || e.keyCode === 123) {
                 e.preventDefault();
+                bloquearPorInspector();
                 return false;
             }
-            // Ctrl+Shift+I, Ctrl+Shift+C, Ctrl+Shift+J (Atajos de Inspección y Consola)
-            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c' || e.key === 'J' || e.key === 'j')) {
+            // Ctrl+Shift+I, Ctrl+Shift+C, Ctrl+Shift+J, Ctrl+Shift+K (Atajos de Inspección y Consola)
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c' || e.key === 'J' || e.key === 'j' || e.key === 'K' || e.key === 'k')) {
                 e.preventDefault();
+                bloquearPorInspector();
                 return false;
             }
             // Ctrl+U (Ver código fuente)
             if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
                 e.preventDefault();
+                bloquearPorInspector();
                 return false;
             }
             // Ctrl+S (Intentar guardar la página localmente)
@@ -579,66 +823,335 @@
                 e.preventDefault();
                 return false;
             }
-        });
-
-        // Detector de apertura de herramientas de desarrollo (Consola)
-        (function() {
-            const threshold = 160;
-            setInterval(function() {
-                if (window.outerWidth - window.innerWidth > threshold || 
-                    window.outerHeight - window.innerHeight > threshold) {
-                    console.clear();
-                }
-            }, 1000);
-        })();
-
-        // Inicializar carga de base de datos local al arrancar la app
-        window.addEventListener('load', () => {
-            if (!localStorage.getItem('calificaciones_2c')) {
-                localStorage.setItem('calificaciones_2c', JSON.stringify([]));
+            // Ctrl+P (Intentar imprimir / capturar la pantalla como PDF)
+            if (e.ctrlKey && (e.key === 'P' || e.key === 'p')) {
+                e.preventDefault();
+                return false;
             }
-            cargarNominaDesdeStorage();
         });
 
-        // Carga y sincronización de estudiantes
-        function cargarNominaDesdeStorage() {
-            estudiantes = JSON.parse(localStorage.getItem('estudiantes_registrados_dinamicos')) || [];
-            document.getElementById('nomina-count').innerText = estudiantes.length;
+        // 3. Bloqueo de arrastre y soltado de elementos
+        document.addEventListener('dragstart', event => event.preventDefault());
+
+        // 4. Detector Reactivo de Redimensionamiento (Inhabilitado inteligentemente si está dentro de un iframe para evitar falsos positivos de consola)
+        const threshold = 160;
+        setInterval(function() {
+            // Si la aplicación corre embebida dentro de un iframe (como en el Canvas o previsualizador web), ignorar este detector
+            if (window.self !== window.top) return;
+
+            if (window.outerWidth - window.innerWidth > threshold || 
+                window.outerHeight - window.innerHeight > threshold) {
+                console.clear();
+                bloquearPorInspector();
+            }
+        }, 1000);
+
+        // Función de Bloqueo Absoluto
+        function bloquearPorInspector() {
+            const blockScreen = document.getElementById('security-block-screen');
+            if (blockScreen) blockScreen.classList.remove('hidden');
             
-            // Si la nómina está vacía, deshabilitar simulación
-            const btnSim = document.getElementById('btn-simular');
-            if (estudiantes.length === 0) {
-                btnSim.disabled = true;
-                btnSim.classList.add('opacity-40', 'cursor-not-allowed');
-            } else {
-                btnSim.disabled = false;
-                btnSim.classList.remove('opacity-40', 'cursor-not-allowed');
+            const header = document.getElementById('main-header');
+            if (header) header.classList.add('hidden');
+            
+            const mainEl = document.querySelector('main');
+            if (mainEl) mainEl.classList.add('hidden');
+        }
+
+
+        // ==============================================
+        // INICIALIZACIÓN DE FIREBASE Y AUTHENTICATION
+        // ==============================================
+
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Error al autenticar el entorno:", err);
             }
+        };
+
+        onAuthStateChanged(auth, (firebaseUser) => {
+            if (firebaseUser) {
+                user = firebaseUser;
+                iniciarSuscripcionesEnVivo();
+            } else {
+                initAuth();
+            }
+        });
+
+        // Suscripciones a Base de Datos Firestore en Tiempo Real (Sincronización Permanente)
+        function iniciarSuscripcionesEnVivo() {
+            if (!user) return;
+
+            // 1. Escucha en vivo de todos los Estudiantes Registrados en el Sistema
+            const estudiantesRef = collection(db, 'artifacts', appId, 'public', 'data', 'estudiantes_registrados');
+            onSnapshot(estudiantesRef, (snapshot) => {
+                estudiantes = [];
+                snapshot.forEach(docSnap => {
+                    estudiantes.push(docSnap.data());
+                });
+                
+                // Ordenar nómina por nombres alfabéticamente
+                estudiantes.sort((a, b) => {
+                    const nameA = a.nombre ? a.nombre : "";
+                    const nameB = b.nombre ? b.nombre : "";
+                    return nameA.localeCompare(nameB);
+                });
+                
+                // Extraer la nómina y actualizar la UI
+                actualizarListaSelectoresFiltroDocente();
+                ejecutarFiltradoYRenderizadoDeDatos();
+            }, (error) => {
+                console.error("Error en tiempo real (estudiantes):", error);
+            });
+
+            // 2. Escucha en vivo de Calificaciones Registradas
+            const calificacionesRef = collection(db, 'artifacts', appId, 'public', 'data', 'calificaciones_registradas');
+            onSnapshot(calificacionesRef, (snapshot) => {
+                calificacionesCargadas = [];
+                snapshot.forEach(docSnap => {
+                    calificacionesCargadas.push(docSnap.data());
+                });
+
+                ejecutarFiltradoYRenderizadoDeDatos();
+            }, (error) => {
+                console.error("Error en tiempo real (calificaciones):", error);
+            });
+
+            // 3. Obtener configuración del curso guardada en Firestore (Ruta de 6 segmentos completa con ID de documento 'main')
+            const cursoConfigRef = doc(db, 'artifacts', appId, 'public', 'data', 'configuracion_curso', 'main');
+            onSnapshot(cursoConfigRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    cursoFiltrado = data.curso || "2do BGU";
+                    paraleloFiltrado = data.paralelo || "C";
+                }
+                actualizarInformacionVisualCurso();
+            });
         }
 
-        // Guardar nómina en localStorage
-        function guardarNominaEnStorage() {
-            localStorage.setItem('estudiantes_registrados_dinamicos', JSON.stringify(estudiantes));
-            cargarNominaDesdeStorage();
+
+        // ==============================================
+        // CUESTIONARIO DE LA EVALUACIÓN DIAGNÓSTICA
+        // ==============================================
+        const preguntas = [
+            {
+                pregunta: "1. ¿Cuál de las siguientes contraseñas cumple mejor con criterios de seguridad digital?",
+                opciones: [
+                    { id: "A", texto: "12345678", rationale: "Esta opción es demasiado predecible y fácil de adivinar por ataques de fuerza bruta." },
+                    { id: "B", texto: "contraseña2026", rationale: "Aunque incluye números, utiliza una palabra común, lo cual debilita la seguridad." },
+                    { id: "C", texto: "Cg#89Lm!2x", rationale: "Combina mayúsculas, minúsculas, números y caracteres especiales, lo que aumenta significativamente la complejidad." },
+                    { id: "D", texto: "qwerty", rationale: "Esta es una de las secuencias de teclado más comunes y menos seguras del mundo." }
+                ],
+                correcta: "C"
+            },
+            {
+                pregunta: "2. ¿Cuál es la principal función de la autenticación en seguridad digital?",
+                opciones: [
+                    { id: "A", texto: "Acelerar el acceso a páginas web", rationale: "La velocidad de acceso depende de la conexión y el servidor, no del proceso de identificación." },
+                    { id: "B", texto: "Verificar la identidad del usuario", rationale: "Su objetivo es asegurar que la persona que intenta acceder sea realmente quien dice ser." },
+                    { id: "C", texto: "Guardar contraseñas automáticamente", rationale: "Guardar contraseñas es una función de los gestores de claves, no la esencia de la autenticación." },
+                    { id: "D", texto: "Eliminar virus", rationale: "De esto se encargan los programas antivirus o antimalware." }
+                ],
+                correcta: "B"
+            },
+            {
+                pregunta: "3. ¿Cuál de las siguientes prácticas representa un uso ético de la inteligencia artificial en educación?",
+                opciones: [
+                    { id: "A", texto: "Copiar tareas generadas por IA sin revisión", rationale: "Esto constituye una falta de integridad académica y no contribuye al aprendizaje real." },
+                    { id: "B", texto: "Usar IA para generar ideas y luego analizarlas críticamente", rationale: "Utiliza la tecnología como apoyo para el proceso creativo y analítico propio." },
+                    { id: "C", texto: "Presentar contenido de IA como propio sin citar", rationale: "Ocultar la fuente de la información es una forma de plagio digital." },
+                    { id: "D", texto: "Evitar el uso de IA completamente", rationale: "Ignorar la tecnología no es necesariamente una cuestión de ética, sino de omisión de herramientas actuales." }
+                ],
+                correcta: "B"
+            },
+            {
+                pregunta: "4. ¿Qué elemento NO es recomendable al crear una contraseña segura?",
+                opciones: [
+                    { id: "A", texto: "Uso de símbolos", rationale: "Los símbolos son muy recomendados porque dificultan la predicción de la clave." },
+                    { id: "B", texto: "Combinación de letras y números", rationale: "Mezclar tipos de caracteres es una de las reglas básicas para la fortaleza de una clave." },
+                    { id: "C", texto: "Información personal (nombre, fecha de nacimiento)", rationale: "Estos datos son fáciles de investigar para terceros y debilitan la seguridad de la cuenta." },
+                    { id: "D", texto: "Longitud mayor a 8 caracteres", rationale: "Cuanto más larga sea la contraseña, más tiempo requiere un sistema para descifrarla." }
+                ],
+                correcta: "C"
+            },
+            {
+                pregunta: "5. ¿Cuál es la estructura básica de una página web?",
+                opciones: [
+                    { id: "A", texto: "Texto - Imagen - Video", rationale: "Estos son tipos de contenido, pero no definen la estructura organizativa de la página." },
+                    { id: "B", texto: "Inicio - Contenido - Navegación", rationale: "Define las secciones fundamentales que permiten al usuario entender y recorrer el sitio." },
+                    { id: "C", texto: "Archivo - Carpeta - Sistema", rationale: "Esta es una jerarquía de almacenamiento de datos en un sistema operativo." },
+                    { id: "D", texto: "Entrada - Proceso - Salida", rationale: "Este es el modelo básico de funcionamiento de un sistema de procesamiento de datos." }
+                ],
+                correcta: "B"
+            },
+            {
+                pregunta: "6. ¿Qué se entiende por organización de contenido digital?",
+                opciones: [
+                    { id: "A", texto: "Guardar archivos sin orden", rationale: "Esto es precisamente lo opuesto a organizar, dificultando la recuperación de información." },
+                    { id: "B", texto: "Diseñar solo con imágenes", rationale: "La organización no depende del formato, sino de la disposición de los elementos." },
+                    { id: "C", texto: "Estructurar información de manera clara y lógica", rationale: "Permite que cualquier usuario encuentre lo que busca sin confusión." },
+                    { id: "D", texto: "Usar únicamente texto", rationale: "El contenido digital suele ser multimedia; limitarse a texto no garantiza organización." }
+                ],
+                correcta: "C"
+            },
+            {
+                pregunta: "7. ¿Cuál de las siguientes acciones mejora la presentación de una página web?",
+                opciones: [
+                    { id: "A", texto: "Usar colores al azar", rationale: "El uso aleatorio de colores genera ruido visual y distrae al usuario." },
+                    { id: "B", texto: "No incluir títulos", rationale: "La ausencia de títulos impide que el lector identifique rápidamente los temas." },
+                    { id: "C", texto: "Mantener coherencia visual y jerarquía", rationale: "Ayuda a guiar la vista del usuario hacia los puntos más importantes de forma ordenada." },
+                    { id: "D", texto: "Colocar toda la información junta", rationale: "Saturar la pantalla de información cansa al usuario y dificulta la lectura." }
+                ],
+                correcta: "C"
+            },
+            {
+                pregunta: "8. ¿Qué característica define una página web funcional?",
+                opciones: [
+                    { id: "A", texto: "Tiene solo texto", rationale: "Una página puede ser funcional teniendo diversos elementos multimedia." },
+                    { id: "B", texto: "No posee enlaces", rationale: "Los enlaces son la base de la navegación web; sin ellos, la funcionalidad es limitada." },
+                    { id: "C", texto: "Permite navegar entre secciones correctamente", rationale: "La funcionalidad implica que el sitio cumple su propósito de ser navegable y útil." },
+                    { id: "D", texto: "Usa muchos colores", rationale: "La estética no garantiza que la página funcione bien o sea fácil de usar." }
+                ],
+                correcta: "C"
+            },
+            {
+                pregunta: "9. ¿Cuál es el propósito del diseño digital básico?",
+                opciones: [
+                    { id: "A", texto: "Decorar sin intención", rationale: "El diseño siempre debe tener un propósito comunicativo, no solo estético." },
+                    { id: "B", texto: "Organizar y presentar información de forma atractiva", rationale: "Busca el equilibrio entre la estética and la claridad para comunicar un mensaje." },
+                    { id: "C", texto: "Reducir el contenido", rationale: "El diseño ayuda a presentar el contenido, no necesariamente a recortarlo." },
+                    { id: "D", texto: "Eliminar imágenes", rationale: "Las imágenes son componentes vitales del diseño para apoyar el mensaje visual." }
+                ],
+                correcta: "B"
+            },
+            {
+                pregunta: "10. ¿Qué acción evidencia pensamiento crítico frente al uso de IA?",
+                opciones: [
+                    { id: "A", texto: "Copiar sin analizar", rationale: "Aceptar resultados sin cuestionar es lo opuesto al pensamiento crítico." },
+                    { id: "B", texto: "Usar IA sin comprender resultados", rationale: "El uso ciego de herramientas tecnológicas puede llevar a errores graves." },
+                    { id: "C", texto: "Evaluar y validar la información generada", rationale: "Implica verificar la veracidad y calidad de lo que la herramienta produce." },
+                    { id: "D", texto: "Evitar toda tecnología", rationale: "El pensamiento crítico implica saber usar las herramientas, no rechazarlas por sistema." }
+                ],
+                correcta: "C"
+            }
+        ];
+
+
+        // ==============================================
+        // MÉTODOS DE FILTRADO, CLASIFICACIÓN Y SEGMENTACIÓN (REGLA 2)
+        // ==============================================
+
+        // Devuelve el listado de estudiantes filtrados por el curso y el paralelo actualmente activos en memoria
+        function obtenerEstudiantesFiltrados() {
+            return estudiantes.filter(est => {
+                const cursoEst = est.curso ? est.curso.trim().toUpperCase() : "";
+                const paraleloEst = est.paralelo ? est.paralelo.trim().toUpperCase() : "";
+                return cursoEst === cursoFiltrado.toUpperCase() && paraleloEst === paraleloFiltrado.toUpperCase();
+            });
         }
 
-        // 4. FUNCIONES DE INTERFAZ Y CONTROL
+        // Devuelve el listado de calificaciones correspondientes al curso y paralelo activos
+        function obtenerCalificacionesFiltradas() {
+            return calificacionesCargadas.filter(cal => {
+                // Cruzar con los estudiantes para heredar su curso y paralelo
+                const estAsociado = estudiantes.find(e => parseInt(e.cedula, 10) === parseInt(cal.cedula, 10));
+                if (estAsociado) {
+                    const cursoEst = estAsociado.curso ? estAsociado.curso.trim().toUpperCase() : "";
+                    const paraleloEst = estAsociado.paralelo ? estAsociado.paralelo.trim().toUpperCase() : "";
+                    return cursoEst === cursoFiltrado.toUpperCase() && paraleloEst === paraleloFiltrado.toUpperCase();
+                }
+                return false;
+            });
+        }
 
-        // Pantalla 1: Verificar Cédula (Lógica inteligente con soporte de ceros eliminados)
+        // REQUISITO: Limitar selectores de filtro docentes estrictamente a las opciones definidas del sistema una vez subidos
+        function actualizarListaSelectoresFiltroDocente() {
+            const selectCurso = document.getElementById('select-filtro-curso');
+            const selectParalelo = document.getElementById('select-filtro-paralelo');
+            if (!selectCurso || !selectParalelo) return;
+
+            // Listados de control permitidos por el usuario
+            const cursosPermitidos = ["1DO.", "2DO", "3RO."];
+            const paralelosPermitidos = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
+
+            // Filtrar y extraer únicamente los cursos y paralelos válidos que estén registrados en sistema
+            const cursosUnicos = [...new Set(estudiantes.map(e => e.curso ? e.curso.trim().toUpperCase() : ""))].filter(c => cursosPermitidos.includes(c));
+            const paralelosUnicos = [...new Set(estudiantes.map(e => e.paralelo ? e.paralelo.trim().toUpperCase() : ""))].filter(p => paralelosPermitidos.includes(p));
+
+            // Valores de fallback estables si la base de datos cloud aún está vacía
+            if (!cursosUnicos.includes(cursoFiltrado.toUpperCase())) cursosUnicos.push(cursoFiltrado.toUpperCase());
+            if (!paralelosUnicos.includes(paraleloFiltrado.toUpperCase())) paralelosUnicos.push(paraleloFiltrado.toUpperCase());
+
+            cursosUnicos.sort();
+            paralelosUnicos.sort();
+
+            selectCurso.innerHTML = '';
+            cursosUnicos.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                // Mostrar con el formato amigable
+                opt.innerText = c === "1DO." ? "1do." : c === "2DO" ? "2do" : c === "3RO." ? "3ro." : c;
+                opt.selected = (c === cursoFiltrado.toUpperCase());
+                selectCurso.appendChild(opt);
+            });
+
+            selectParalelo.innerHTML = '';
+            paralelosUnicos.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p;
+                opt.innerText = `Paralelo ${p}`;
+                opt.selected = (p === paraleloFiltrado.toUpperCase());
+                selectParalelo.appendChild(opt);
+            });
+        }
+
+        // Procesar cambio de curso o paralelo en la UI docente
+        function cambiarFiltroCursoParalelo() {
+            const selectCurso = document.getElementById('select-filtro-curso');
+            const selectParalelo = document.getElementById('select-filtro-paralelo');
+            if (selectCurso && selectParalelo) {
+                cursoFiltrado = selectCurso.value.trim();
+                paraleloFiltrado = selectParalelo.value.trim();
+            }
+            
+            ejecutarFiltradoYRenderizadoDeDatos();
+        }
+
+        // Ejecuta el refresco de métricas y tablas basándose en el segmento seleccionado
+        function ejecutarFiltradoYRenderizadoDeDatos() {
+            actualizarInformacionVisualCurso();
+            actualizarMetricas();
+            construirTablaEstudiantes();
+            actualizarBotonSimulacion();
+        }
+
+
+        // ==============================================
+        // LÓGICA DE LOGIN Y CUESTIONARIO ESTUDIANTIL
+        // ==============================================
+
         function verificarEstudiante() {
             const inputCedula = document.getElementById('input-cedula').value.trim();
             const errorDiv = document.getElementById('login-error');
             const errorText = document.getElementById('login-error-text');
             
             if (estudiantes.length === 0) {
-                errorText.innerText = "La nómina de estudiantes está vacía. El docente debe cargar alumnos primero.";
-                errorDiv.classList.remove('hidden');
+                if (errorText && errorDiv) {
+                    errorText.innerText = "La nómina de estudiantes está vacía. El docente debe cargar alumnos primero.";
+                    errorDiv.classList.remove('hidden');
+                }
                 return;
             }
 
-            // Buscar coincidencia exacta o numérica
+            // Búsqueda inteligente de estudiantes cargados
             const match = estudiantes.find(est => {
-                const dbCedula = est.cedula.trim();
+                const dbCedula = est.cedula ? est.cedula.trim() : "";
                 const cleanInput = inputCedula;
                 return (
                     dbCedula === cleanInput ||
@@ -650,47 +1163,65 @@
 
             if (match) {
                 estudianteActual = match;
-                errorDiv.classList.add('hidden');
+                if (errorDiv) errorDiv.classList.add('hidden');
                 
-                // Configurar datos en pantalla de bienvenida
-                document.getElementById('student-name').innerText = estudianteActual.nombre;
-                
-                // Ir a la pantalla de bienvenida
+                // CONTROL DE INTENTO ÚNICO: Revisa si ya cuenta con calificación previa en Firestore
+                const yaRindio = calificacionesCargadas.find(c => {
+                    return parseInt(c.cedula, 10) === parseInt(estudianteActual.cedula, 10);
+                });
+
+                if (yaRindio) {
+                    // Si ya rindió la evaluación, bloquear examen y redirigir a resultados
+                    const resName = document.getElementById('result-student-name');
+                    const resScore = document.getElementById('result-score');
+                    if (resName) resName.innerText = estudianteActual.nombre;
+                    if (resScore) resScore.innerText = `${yaRindio.nota.toFixed(2)} / 10`;
+                    
+                    // Asignar los filtros locales para que la pantalla de resultados del estudiante evalúe correctamente su propio curso
+                    cursoFiltrado = estudianteActual.curso ? estudianteActual.curso.trim() : "2do BGU";
+                    paraleloFiltrado = estudianteActual.paralelo ? estudianteActual.paralelo.trim() : "C";
+
+                    // Evaluar si se desbloquea el reporte del detallado
+                    evaluarEstadoDesbloqueoReporteEstudiante();
+                    mostrarPantalla('screen-results');
+                    mostrarAlertaRapida("Usted ya ha realizado esta evaluación previamente. Se le redirigirá a su reporte.");
+                    return;
+                }
+
+                const sName = document.getElementById('student-name');
+                if (sName) sName.innerText = estudianteActual.nombre;
                 mostrarPantalla('screen-welcome');
             } else {
-                errorText.innerText = "El número de cédula ingresado no consta en el registro escolar activo.";
-                errorDiv.classList.remove('hidden');
+                if (errorText && errorDiv) {
+                    errorText.innerText = "El número de cédula ingresado no consta en el registro escolar activo.";
+                    errorDiv.classList.remove('hidden');
+                }
             }
         }
 
-        // Pantalla 2: Iniciar Examen
         function comenzarEvaluacion() {
             indicePreguntaActual = 0;
             respuestasEstudiante = {};
-            
-            // Configurar barra lateral e inicial
-            document.getElementById('student-quiz-badge').innerText = estudianteActual.nombre;
-            
+            const badge = document.getElementById('student-quiz-badge');
+            if (badge) badge.innerText = estudianteActual.nombre;
             mostrarPregunta();
             mostrarPantalla('screen-quiz');
         }
 
-        // Renderizar la pregunta activa
         function mostrarPregunta() {
             const q = preguntas[indicePreguntaActual];
+            const progress = document.getElementById('question-progress');
+            if (progress) progress.innerText = `Pregunta ${indicePreguntaActual + 1} de ${preguntas.length}`;
             
-            // Actualizar textos de progreso
-            document.getElementById('question-progress').innerText = `Pregunta ${indicePreguntaActual + 1} de ${preguntas.length}`;
-            
-            // Actualizar barra de progreso visual
             const pct = ((indicePreguntaActual + 1) / preguntas.length) * 100;
-            document.getElementById('progress-bar').style.width = `${pct}%`;
+            const pBar = document.getElementById('progress-bar');
+            if (pBar) pBar.style.width = `${pct}%`;
+            
+            const qText = document.getElementById('question-text');
+            if (qText) qText.innerText = q.pregunta;
 
-            // Imprimir texto de la pregunta
-            document.getElementById('question-text').innerText = q.pregunta;
-
-            // Renderizar las opciones
             const container = document.getElementById('options-container');
+            if (!container) return;
             container.innerHTML = '';
 
             q.opciones.forEach(opcion => {
@@ -704,7 +1235,6 @@
                 }`;
                 card.onclick = () => seleccionarOpcion(opcion.id);
 
-                // Checkbox circular de selección
                 const circle = document.createElement('div');
                 circle.className = `w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all ${
                     seleccionada 
@@ -725,18 +1255,19 @@
             });
 
             const btnNext = document.getElementById('btn-next');
-            if (indicePreguntaActual === preguntas.length - 1) {
-                btnNext.innerText = "Finalizar Prueba";
-                btnNext.classList.remove('bg-brand-600', 'hover:bg-brand-700');
-                btnNext.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'shadow-emerald-100');
-            } else {
-                btnNext.innerText = "Siguiente";
-                btnNext.classList.add('bg-brand-600', 'hover:bg-brand-700');
-                btnNext.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'shadow-emerald-100');
+            if (btnNext) {
+                if (indicePreguntaActual === preguntas.length - 1) {
+                    btnNext.innerText = "Finalizar Prueba";
+                    btnNext.classList.remove('bg-brand-600', 'hover:bg-brand-700');
+                    btnNext.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'shadow-emerald-100');
+                } else {
+                    btnNext.innerText = "Siguiente";
+                    btnNext.classList.add('bg-brand-600', 'hover:bg-brand-700');
+                    btnNext.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'shadow-emerald-100');
+                }
             }
         }
 
-        // Selección de una opción de respuesta
         function seleccionarOpcion(id) {
             respuestasEstudiante[indicePreguntaActual] = id;
             mostrarPregunta();
@@ -744,7 +1275,6 @@
 
         // Ir a la pregunta siguiente (o finalizar la prueba si es la última)
         function preguntaSiguiente() {
-            // Obligar a responder la pregunta activa antes de continuar
             if (!respuestasEstudiante[indicePreguntaActual]) {
                 mostrarAlertaRapida("Debes seleccionar una opción para poder continuar.");
                 return;
@@ -758,80 +1288,174 @@
             }
         }
 
-        // Procesar puntaje final y cambiar de pantalla
-        function procesarResultadosYTerminar() {
-            let correctas = 0;
+        // Registro de Calificaciones en Base de Datos Cloud (Firestore)
+        async function procesarResultadosYTerminar() {
+            if (!user) return;
 
+            let correctas = 0;
             preguntas.forEach((q, index) => {
                 if (respuestasEstudiante[index] === q.correcta) {
                     correctas++;
                 }
             });
 
-            // Calificación sobre 10
             const notaFinal = ((correctas / preguntas.length) * 10).toFixed(2);
 
-            // Guardar en Base de Datos Local
+            // Sanitizar la cédula para usar como ID del documento en Firestore
+            const safeId = estudianteActual.cedula.trim().replace(/[^a-zA-Z0-9_-]/g, "");
+
+            // Estructurar el detalle de respuestas del cuestionario
+            const detalleRespuestas = {};
+            preguntas.forEach((q, index) => {
+                detalleRespuestas[index] = respuestasEstudiante[index] || "";
+            });
+
             const nuevoRegistro = {
                 cedula: estudianteActual.cedula,
                 nombre: estudianteActual.nombre,
                 fecha: obtenerFechaHoraActual(),
                 correctas: correctas,
-                nota: parseFloat(notaFinal)
+                nota: parseFloat(notaFinal),
+                respuestas: detalleRespuestas
             };
 
-            salvarCalificacionLocal(nuevoRegistro);
+            try {
+                // Verificar robustamente que safeId y appId no estén vacíos antes de escribir
+                if (safeId && appId) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'calificaciones_registradas', safeId);
+                    await setDoc(docRef, nuevoRegistro);
+                }
+            } catch (err) {
+                console.error("Error al persistir calificación:", err);
+            }
 
-            // Cargar datos del estudiante en la pantalla de resultados
-            document.getElementById('result-student-name').innerText = estudianteActual.nombre;
-            document.getElementById('result-score').innerText = `${notaFinal} / 10`;
+            const resName = document.getElementById('result-student-name');
+            const resScore = document.getElementById('result-score');
+            if (resName) resName.innerText = estudianteActual.nombre;
+            if (resScore) resScore.innerText = `${notaFinal} / 10`;
 
+            // Evaluar de inmediato si tras su envío se desbloquea el reporte
+            evaluarEstadoDesbloqueoReporteEstudiante();
             mostrarPantalla('screen-results');
         }
 
-        // Guardar resultado individualmente en localStorage previniendo duplicados
-        function salvarCalificacionLocal(registro) {
-            let historico = JSON.parse(localStorage.getItem('calificaciones_2c')) || [];
-            
-            // Eliminar si ya existía un registro de esta cédula para no duplicar datos
-            historico = historico.filter(item => parseInt(item.cedula, 10) !== parseInt(registro.cedula, 10));
-            
-            historico.push(registro);
-            localStorage.setItem('calificaciones_2c', JSON.stringify(historico));
+        // EVALUACIÓN DE DESBLOQUEO DE REPORTES DETALLADOS EN TIEMPO REAL
+        function evaluarEstadoDesbloqueoReporteEstudiante() {
+            if (!estudianteActual) return;
+
+            const totalEstudiantesSegmento = obtenerEstudiantesFiltrados().length;
+            const totalEvaluadosSegmento = obtenerCalificacionesFiltradas().length;
+
+            const contenedorReporte = document.getElementById('reporte-detallado-container');
+            const mensajeBloqueado = document.getElementById('reporte-bloqueado-mensaje');
+
+            if (!contenedorReporte || !mensajeBloqueado) return;
+
+            // Solo se permite la visualización detallada del reporte si la totalidad de alumnos ya han rendido el examen en el segmento correspondiente
+            if (totalEstudiantesSegmento > 0 && totalEvaluadosSegmento >= totalEstudiantesSegmento) {
+                // Desbloqueado: Mostrar lista de respuestas con retroalimentaciones pedagógicas (rationale)
+                mensajeBloqueado.classList.add('hidden');
+                contenedorReporte.classList.remove('hidden');
+
+                // Encontrar la calificación del estudiante activo en la base de datos
+                const miCalificacion = calificacionesCargadas.find(c => {
+                    return parseInt(c.cedula, 10) === parseInt(estudianteActual.cedula, 10);
+                });
+
+                if (miCalificacion && miCalificacion.respuestas) {
+                    generarRevisionVisualReporte(miCalificacion.respuestas);
+                }
+            } else {
+                // Bloqueado
+                mensajeBloqueado.classList.remove('hidden');
+                contenedorReporte.classList.add('hidden');
+            }
         }
 
-        // Auxiliar: Obtener formato ordenado de fecha y hora
+        // Renderizado interactivo del reporte de revisión pedagógica
+        function generarRevisionVisualReporte(misRespuestas) {
+            const listaContainer = document.getElementById('reporte-preguntas-lista');
+            if (!listaContainer) return;
+            listaContainer.innerHTML = '';
+
+            preguntas.forEach((q, index) => {
+                const miOpcionId = misRespuestas[index];
+                const esCorrecta = miOpcionId === q.correcta;
+
+                const cardPregunta = document.createElement('div');
+                cardPregunta.className = `p-5 rounded-2xl border ${esCorrecta ? 'bg-emerald-50/30 border-emerald-200' : 'bg-rose-50/20 border-rose-200'} space-y-3`;
+
+                // Identificar texto de mi opción y la opción correcta
+                const miOpcionObj = q.opciones.find(o => o.id === miOpcionId);
+                const opcionCorrectaObj = q.opciones.find(o => o.id === q.correcta);
+
+                // Agregar el botón del Tutor IA en caso de error o duda
+                cardPregunta.innerHTML = `
+                    <div class="flex justify-between items-start gap-4">
+                        <h5 class="font-bold text-slate-900 text-sm leading-snug">${q.pregunta}</h5>
+                        <button onclick="abrirTutorIA('${q.pregunta.replace(/'/g, "\\'")}', '${miOpcionObj ? miOpcionObj.texto.replace(/'/g, "\\'") : 'No respondida'}', '${opcionCorrectaObj ? opcionCorrectaObj.texto.replace(/'/g, "\\'") : ''}')" 
+                                class="text-xs font-bold text-violet-600 hover:text-violet-800 bg-violet-50 hover:bg-violet-100 py-1.5 px-3 rounded-lg flex items-center gap-1 transition-all border border-violet-200 flex-shrink-0">
+                            <span>✨ Consultar Tutor IA</span>
+                        </button>
+                    </div>
+                    <div class="text-xs space-y-1.5 font-medium">
+                        <p class="flex items-center gap-1.5 ${esCorrecta ? 'text-emerald-700' : 'text-rose-600'}">
+                            <span class="font-bold">Tu respuesta:</span> 
+                            <span>${miOpcionId}) ${miOpcionObj ? miOpcionObj.texto : 'No respondida'}</span>
+                            ${esCorrecta ? '✓' : '✗'}
+                        </p>
+                        ${!esCorrecta ? `
+                        <p class="text-emerald-800">
+                            <span class="font-bold">Respuesta correcta:</span> 
+                            <span>${q.correcta}) ${opcionCorrectaObj ? opcionCorrectaObj.texto : ''}</span>
+                        </p>` : ''}
+                    </div>
+                    <div class="text-[11px] text-slate-500 bg-white/70 p-3 rounded-xl border border-slate-100/60 leading-relaxed">
+                        <strong class="text-slate-700">Justificación pedagógica:</strong> ${opcionCorrectaObj ? opcionCorrectaObj.rationale : ''}
+                    </div>
+                `;
+                listaContainer.appendChild(cardPregunta);
+            });
+        }
+
+        // METODOS COMPLEMENTARIOS DE TIEMPO
         function obtenerFechaHoraActual() {
             const d = new Date();
             const pad = (n) => n.toString().padStart(2, '0');
             return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
         }
 
-        // Reiniciar y regresar a pantalla de ingreso
         function volverAlInicio() {
             estudianteActual = null;
             indicePreguntaActual = 0;
             respuestasEstudiante = {};
-            document.getElementById('input-cedula').value = '';
-            document.getElementById('input-clave-docente').value = '';
-            document.getElementById('docente-login-error').classList.add('hidden');
+            
+            const ced = document.getElementById('input-cedula');
+            const docKey = document.getElementById('input-clave-docente');
+            const err = document.getElementById('docente-login-error');
+            
+            if (ced) ced.value = '';
+            if (docKey) docKey.value = '';
+            if (err) err.classList.add('hidden');
+            
             mostrarPantalla('screen-login');
         }
 
-        // Control de visibilidad de pantallas generales
         function mostrarPantalla(idPantalla) {
             const pantallas = ['screen-login', 'screen-welcome', 'screen-quiz', 'screen-results', 'screen-docente-login', 'screen-docente-panel'];
             pantallas.forEach(p => {
                 const el = document.getElementById(p);
-                if (p === idPantalla) {
-                    el.classList.remove('hidden');
-                } else {
-                    el.classList.add('hidden');
+                if (el) {
+                    if (p === idPantalla) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
                 }
             });
         }
 
-        // Mensaje flotante de alerta personalizado
+        // CUADRO DE MENSAJES FLOTANTES
         function mostrarAlertaRapida(mensaje) {
             const toast = document.createElement('div');
             toast.className = "fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-5 py-3.5 rounded-xl shadow-lg z-50 transition-all duration-300";
@@ -840,9 +1464,61 @@
             setTimeout(() => toast.remove(), 2500);
         }
 
-        // ==========================================
-        // SECCIÓN DE ADMINISTRACIÓN Y GESTIÓN DOCENTE
-        // ==========================================
+        // SISTEMA DE DIÁLOGO DE CONFIRMACIÓN INTEGRADO (Reemplaza confirm() y alert() nativos)
+        function mostrarConfirmacion(titulo, mensaje, onConfirm) {
+            const modal = document.getElementById('custom-modal');
+            const titleEl = document.getElementById('modal-title');
+            const msgEl = document.getElementById('modal-message');
+            const btnCancel = document.getElementById('modal-btn-cancel');
+            const btnConfirm = document.getElementById('modal-btn-confirm');
+            
+            if (!modal || !titleEl || !msgEl || !btnCancel || !btnConfirm) return;
+            
+            titleEl.innerText = titulo;
+            msgEl.innerText = mensaje;
+            
+            modal.classList.remove('hidden');
+            
+            btnCancel.onclick = () => {
+                modal.classList.add('hidden');
+            };
+            btnConfirm.onclick = () => {
+                modal.classList.add('hidden');
+                onConfirm();
+            };
+        }
+
+        // ==============================================
+        // MÓDULO ADMINISTRATIVO DOCENTE (CON EXPORTACIÓN)
+        // ==============================================
+
+        function mostrarAccesoDocente() {
+            mostrarPantalla('screen-docente-login');
+            const inputClave = document.getElementById('input-clave-docente');
+            if (inputClave) inputClave.focus();
+        }
+
+        // EXPOSICIÓN GLOBAL DE mostrarPantalla: Corregido el problema de aislamiento de variables de módulo de JS
+        window.mostrarPantalla = mostrarPantalla;
+
+        function validarAccesoDocente() {
+            const docKey = document.getElementById('input-clave-docente');
+            const inputClave = docKey ? docKey.value : "";
+            const errorDiv = document.getElementById('docente-login-error');
+
+            if (inputClave === CLAVE_DOCENTE_MASTER) {
+                if (errorDiv) errorDiv.classList.add('hidden');
+                inicializarPanelDocente();
+                mostrarPantalla('screen-docente-panel');
+            } else {
+                if (errorDiv) errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function initializePanelDocente() {
+            // Callback por si acaso llama con la firma original en inglés
+            inicializarPanelDocente();
+        }
 
         function inicializarPanelDocente() {
             actualizarMetricas();
@@ -850,16 +1526,52 @@
             construirTablaEstudiantes();
         }
 
+        // Operación de render de opciones corregido a español ("opciones")
+        function corregirOpcionesPreguntas() {
+            preguntas.forEach(p => {
+                if (p.options && !p.opciones) {
+                    p.opciones = p.options;
+                }
+            });
+        }
+        corregirOpcionesPreguntas();
+
+        // Actualizar datos visuales del Curso y Paralelo en la aplicación
+        function actualizarInformacionVisualCurso() {
+            const header = document.getElementById('header-curso-paralelo');
+            const metricDesc = document.getElementById('sub-metric-total-desc');
+            const labelNomina = document.getElementById('label-nomina-resumen');
+            const welcomeCurso = document.getElementById('welcome-student-curso');
+            const resultCurso = document.getElementById('result-student-curso');
+
+            if (header) {
+                header.innerHTML = `Nómina y Base de Datos del Curso: <span class="font-extrabold text-brand-700">${cursoFiltrado.toUpperCase()} "${paraleloFiltrado.toUpperCase()}"</span>`;
+            }
+            if (metricDesc) {
+                metricDesc.innerText = `Matriculados en ${cursoFiltrado.toUpperCase()} "${paraleloFiltrado.toUpperCase()}"`;
+            }
+            if (labelNomina) {
+                labelNomina.innerHTML = `Listado actual de estudiantes en sistema para <strong class="text-brand-600">${cursoFiltrado.toUpperCase()} "${paraleloFiltrado.toUpperCase()}"</strong>: <strong id="nomina-count" class="text-slate-700 font-bold">${obtenerEstudiantesFiltrados().length}</strong>`;
+            }
+            if (welcomeCurso) {
+                welcomeCurso.innerText = `Curso: ${cursoFiltrado.toUpperCase()} "${paraleloFiltrado.toUpperCase()}"`;
+            }
+            if (resultCurso) {
+                resultCurso.innerText = `${cursoFiltrado.toUpperCase()} "${paraleloFiltrado.toUpperCase()}"`;
+            }
+        }
+
         function actualizarMetricas() {
-            const data = JSON.parse(localStorage.getItem('calificaciones_2c')) || [];
-            const totalEstudiantes = estudiantes.length;
-            const totalEvaluados = data.length;
+            const alumnosSegmento = obtenerEstudiantesFiltrados();
+            const calificacionesSegmento = obtenerCalificacionesFiltradas();
+
+            const totalEstudiantes = alumnosSegmento.length;
+            const totalEvaluados = calificacionesSegmento.length;
             const evaluadosPct = totalEstudiantes > 0 ? ((totalEvaluados / totalEstudiantes) * 100).toFixed(0) : 0;
 
-            // Calcular Promedio de Calificaciones
             let suma = 0;
             let aprobados = 0;
-            data.forEach(item => {
+            calificacionesSegmento.forEach(item => {
                 suma += item.nota;
                 if (item.nota >= 7.0) {
                     aprobados++;
@@ -869,47 +1581,58 @@
             const promedio = totalEvaluados > 0 ? (suma / totalEvaluados).toFixed(2) : "0.00";
             const aprobadosPct = totalEvaluados > 0 ? ((aprobados / totalEvaluados) * 100).toFixed(0) : 0;
 
-            // Renderizar métricas en pantalla
-            document.getElementById('metric-total-est').innerText = totalEstudiantes;
-            document.getElementById('metric-evaluados').innerText = totalEvaluados;
-            document.getElementById('metric-evaluados-pct').innerText = `${evaluadosPct}% de la nómina`;
+            const tEst = document.getElementById('metric-total-est');
+            const tEval = document.getElementById('metric-evaluados');
+            const tPct = document.getElementById('metric-evaluados-pct');
+            const promEl = document.getElementById('metric-promedio');
+            const apb = document.getElementById('metric-aprobados');
+            const apbDet = document.getElementById('metric-aprobados-detalle');
+
+            if (tEst) tEst.innerText = totalEstudiantes;
+            if (tEval) tEval.innerText = totalEvaluados;
+            if (tPct) tPct.innerText = `${evaluadosPct}% de la nómina`;
             
-            const promedioEl = document.getElementById('metric-promedio');
-            promedioEl.innerText = promedio;
-            if (parseFloat(promedio) >= 7.0) {
-                promedioEl.className = "text-2xl font-extrabold text-emerald-600 mt-1";
-            } else {
-                promedioEl.className = "text-2xl font-extrabold text-amber-500 mt-1";
+            if (promEl) {
+                promEl.innerText = promedio;
+                if (parseFloat(promedio) >= 7.0) {
+                    promEl.className = "text-2xl font-extrabold text-emerald-600 mt-1";
+                } else {
+                    promEl.className = "text-2xl font-extrabold text-amber-500 mt-1";
+                }
             }
 
-            document.getElementById('metric-aprobados').innerText = `${aprobadosPct}%`;
-            document.getElementById('metric-aprobados-detalle').innerText = `${aprobados} de ${totalEvaluados} aprobados`;
+            if (apb) apb.innerText = `${aprobadosPct}%`;
+            if (apbDet) apbDet.innerText = `${aprobados} de ${totalEvaluados} aprobados`;
 
-            // Cargar datos a la tabla activa de calificaciones
-            construirTablaCalificaciones(data);
+            construirTablaCalificaciones(calificacionesSegmento);
         }
 
         function construirTablaCalificaciones(calificacionesArray) {
             const tbody = document.getElementById('table-body-calificaciones');
             const noData = document.getElementById('no-data-alert');
+            if (!tbody) return;
             tbody.innerHTML = '';
 
             if (calificacionesArray.length === 0) {
-                noData.classList.remove('hidden');
+                if (noData) noData.classList.remove('hidden');
                 return;
             }
-            noData.classList.add('hidden');
+            if (noData) noData.classList.add('hidden');
 
             calificacionesArray.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition-all font-medium";
-
                 const notaColor = item.nota >= 7.0 ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold';
+
+                // Obtener datos del curso y paralelo
+                const estAsociado = estudiantes.find(e => parseInt(e.cedula, 10) === parseInt(item.cedula, 10));
+                const cursoTexto = estAsociado ? `${estAsociado.curso} "${estAsociado.paralelo}"` : `${cursoFiltrado} "${paraleloFiltrado}"`;
 
                 tr.innerHTML = `
                     <td class="p-4 text-slate-400 font-bold">${index + 1}</td>
                     <td class="p-4 font-bold text-slate-800">${item.nombre}</td>
                     <td class="p-4 text-slate-500 font-mono">${item.cedula}</td>
+                    <td class="p-4 text-slate-500 font-bold">${cursoTexto}</td>
                     <td class="p-4 text-slate-500">${item.fecha}</td>
                     <td class="p-4 text-center text-slate-600">${item.correctas} / 10</td>
                     <td class="p-4 text-right ${notaColor}">${item.nota.toFixed(2)}</td>
@@ -918,53 +1641,231 @@
             });
         }
 
-        // Construye el listado de la nómina administrable
+        // Construye el listado de la nómina administrable respetando estrictamente el orden de los campos de Excel
         function construirTablaEstudiantes() {
             const tbody = document.getElementById('table-body-estudiantes');
             const noStudentsAlert = document.getElementById('no-students-alert');
+            if (!tbody) return;
             tbody.innerHTML = '';
 
-            if (estudiantes.length === 0) {
-                noStudentsAlert.classList.remove('hidden');
+            const alumnosSegmento = obtenerEstudiantesFiltrados();
+
+            if (alumnosSegmento.length === 0) {
+                if (noStudentsAlert) noStudentsAlert.classList.remove('hidden');
                 return;
             }
-            noStudentsAlert.classList.add('hidden');
+            if (noStudentsAlert) noStudentsAlert.classList.add('hidden');
 
-            const calificaciones = JSON.parse(localStorage.getItem('calificaciones_2c')) || [];
-
-            estudiantes.forEach((est, index) => {
-                const haRendido = calificaciones.some(c => {
+            alumnosSegmento.forEach((est, index) => {
+                const haRendido = calificacionesCargadas.some(c => {
                     return parseInt(c.cedula, 10) === parseInt(est.cedula, 10);
                 });
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-all font-medium";
+                tr.className = "hover:bg-slate-50/80 transition-all font-medium text-slate-700 text-[11px]";
 
                 const badge = haRendido 
-                    ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Evaluado</span>`
-                    : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-100">Pendiente</span>`;
+                    ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Evaluado</span>`
+                    : `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-100">Pendiente</span>`;
 
                 tr.innerHTML = `
-                    <td class="p-4 text-slate-400 font-bold">${index + 1}</td>
-                    <td class="p-4 font-bold text-slate-800">${est.nombre}</td>
-                    <td class="p-4 text-slate-500 font-mono">${est.cedula}</td>
-                    <td class="p-4">${badge}</td>
+                    <td class="p-4 text-slate-400 font-bold text-xs">${index + 1}</td>
+                    <td class="p-4 font-bold text-slate-900 text-xs">${est.nombre || '-'}</td>
+                    <td class="p-4 text-slate-600 font-bold">${est.curso || '-'}</td>
+                    <td class="p-4 text-slate-600 font-bold">${est.paralelo || '-'}</td>
+                    <td class="p-4 font-mono text-slate-600 text-xs">${est.cedula || '-'}</td>
+                    <td class="p-4 text-slate-600">${est.fechaNac || '-'}</td>
+                    <td class="p-4 text-slate-600 truncate max-w-[150px]">${est.correo || '-'}</td>
+                    <td class="p-4 text-slate-800 font-semibold">${est.repNombre || '-'}</td>
+                    <td class="p-4 font-mono text-slate-600">${est.repCedula || '-'}</td>
+                    <td class="p-4 font-mono text-slate-600">${est.repCelular || '-'}</td>
+                    <td class="p-4 text-slate-500 italic truncate max-w-[150px]" title="${est.observaciones || ''}">${est.observaciones || '-'}</td>
+                    <td class="p-4 text-center">${badge}</td>
                     <td class="p-4 text-center">
-                        <button onclick="eliminarEstudiante('${est.cedula}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs bg-rose-50 hover:bg-rose-100 px-2.5 py-1.5 rounded-lg transition-all">
-                            Eliminar
-                        </button>
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="verFichaDetalles('${est.cedula}')" class="text-brand-600 hover:text-brand-800 font-bold text-[10px] bg-brand-50 hover:bg-brand-100 px-2 py-1 rounded transition-all font-bold">
+                                Ficha
+                            </button>
+                            <button onclick="eliminarEstudiante('${est.cedula}')" class="text-rose-600 hover:text-rose-800 font-bold text-[10px] bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded transition-all font-bold">
+                                Quitar
+                            </button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // Agregar estudiante de forma manual/individual
-        function agregarEstudianteIndividual() {
-            const cedula = document.getElementById('add-est-cedula').value.trim();
-            const nombre = document.getElementById('add-est-nombre').value.trim().toUpperCase();
+        // CONTROL DE MODAL DE FICHA DE DETALLES (BÚSQUEDA ROBUSTA POR CÉDULA)
+        function verFichaDetalles(cedula) {
+            const est = estudiantes.find(e => e.cedula === cedula);
+            if (!est) return;
 
-            if (!cedula || !nombre) {
-                mostrarAlertaRapida("Por favor completa los campos de cédula y nombre.");
+            const detNombre = document.getElementById('detail-nombre');
+            const detCedula = document.getElementById('detail-cedula');
+            const detCursoParalelo = document.getElementById('detail-curso-paralelo');
+            const detCorreo = document.getElementById('detail-correo');
+            const detRepNombre = document.getElementById('detail-rep-nombre');
+            const detRepCedula = document.getElementById('detail-rep-cedula');
+            const detRepCelular = document.getElementById('detail-rep-celular');
+            const detObs = document.getElementById('detail-observaciones');
+            const detFechaNac = document.getElementById('detail-fecha-nac');
+            const modal = document.getElementById('details-modal-student');
+
+            if (detNombre) detNombre.innerText = est.nombre || '-';
+            if (detCedula) detCedula.innerText = est.cedula || '-';
+            if (detCursoParalelo) detCursoParalelo.innerText = `${est.curso || '-'} "${est.paralelo || '-'}"`;
+            if (detCorreo) detCorreo.innerText = est.correo || '-';
+            if (detRepNombre) detRepNombre.innerText = est.repNombre || '-';
+            if (detRepCedula) detRepCedula.innerText = est.repCedula || '-';
+            if (detRepCelular) detRepCelular.innerText = est.repCelular || '-';
+            if (detFechaNac) detFechaNac.innerText = est.fechaNac || '-';
+            if (detObs) detObs.innerText = est.observaciones || 'Ninguna observación registrada.';
+            
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function cerrarFichaDetalles() {
+            const modal = document.getElementById('details-modal-student');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function actualizarBotonSimulacion() {
+            const btnSim = document.getElementById('btn-simular');
+            const alumnosSegmento = obtenerEstudiantesFiltrados();
+            if (btnSim) {
+                if (alumnosSegmento.length === 0) {
+                    btnSim.disabled = true;
+                    btnSim.classList.add('opacity-40', 'cursor-not-allowed');
+                } else {
+                    btnSim.disabled = false;
+                    btnSim.classList.remove('opacity-40', 'cursor-not-allowed');
+                }
+            }
+        }
+
+        // LÓGICA DE CONTROL PREVIO DE CURSO Y PARALELO ANTES DE IMPORTACIÓN
+        
+        function verificarDatosCursoAntesDeArchivo(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            archivoTemporal = file;
+            importacionMasivaManualTemporal = false;
+
+            const inputC = document.getElementById('setup-curso');
+            const inputP = document.getElementById('setup-paralelo');
+            const modal = document.getElementById('course-setup-modal');
+
+            if (inputC) inputC.value = cursoFiltrado;
+            if (inputP) inputP.value = paraleloFiltrado;
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function verificarDatosCursoAntesDePegar() {
+            const textEl = document.getElementById('textarea-importar');
+            const rawText = textEl ? textEl.value.trim() : "";
+            if (!rawText) {
+                mostrarAlertaRapida("Pega o escribe datos en el cuadro de texto antes de procesar.");
+                return;
+            }
+
+            eventoArchivoTemporal = null;
+            importacionMasivaManualTemporal = true;
+
+            const inputC = document.getElementById('setup-curso');
+            const inputP = document.getElementById('setup-paralelo');
+            const modal = document.getElementById('course-setup-modal');
+
+            if (inputC) inputC.value = cursoFiltrado;
+            if (inputP) inputP.value = paraleloFiltrado;
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function cancelarConfiguracionCurso() {
+            const modal = document.getElementById('course-setup-modal');
+            if (modal) modal.classList.add('hidden');
+            
+            const fileEl = document.getElementById('file-import-nomina');
+            if (fileEl) fileEl.value = "";
+            archivoTemporal = null;
+            importacionMasivaManualTemporal = false;
+        }
+
+        async function confirmarConfiguracionCurso() {
+            const cInput = document.getElementById('setup-curso');
+            const pInput = document.getElementById('setup-paralelo');
+
+            const cursoInput = cInput ? cInput.value.trim() : "";
+            const paraleloInput = pInput ? pInput.value.trim().toUpperCase() : "";
+
+            if (!cursoInput || !paraleloInput) {
+                mostrarAlertaRapida("Por favor, introduce el Curso y el Paralelo para el lote de importación.");
+                return;
+            }
+
+            cursoFiltrado = cursoInput;
+            paraleloFiltrado = paraleloInput;
+
+            // Guardar en Firestore la combinación curso/paralelo configurada de forma segura (camino par de 6 segmentos)
+            try {
+                if (appId) {
+                    const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'configuracion_curso', 'main');
+                    await setDoc(configDocRef, {
+                        curso: cursoFiltrado,
+                        paralelo: paraleloFiltrado,
+                        fechaConfiguracion: obtenerFechaHoraActual()
+                    });
+                }
+            } catch (err) {
+                console.error("Error al registrar la configuración del curso en Firestore:", err);
+            }
+
+            actualizarInformacionVisualCurso();
+            const modal = document.getElementById('course-setup-modal');
+            if (modal) modal.classList.add('hidden');
+
+            // Proceder con la importación dependiendo de la vía elegida
+            if (importacionMasivaManualTemporal) {
+                importarListaMasiva();
+            } else if (archivoTemporal) {
+                const lector = new FileReader();
+                lector.onload = async function(e) {
+                    procesarTextoImportacion(e.target.result);
+                };
+                lector.readAsText(archivoTemporal);
+            }
+        }
+
+
+        // OPERACIONES DE NÓMINA EN FIRESTORE (8 CAMPOS REQUERIDOS + CURSO Y PARALELO)
+
+        async function agregarEstudianteIndividual() {
+            if (!user) return;
+            
+            const nomEl = document.getElementById('add-est-nombre');
+            const cedEl = document.getElementById('add-est-cedula');
+            const corEl = document.getElementById('add-est-correo');
+            const repNomEl = document.getElementById('add-est-rep-nombre');
+            const repCedEl = document.getElementById('add-est-rep-cedula');
+            const repCelEl = document.getElementById('add-est-rep-celular');
+            const obsEl = document.getElementById('add-est-observaciones');
+            const curEl = document.getElementById('add-est-curso');
+            const parEl = document.getElementById('add-est-paralelo');
+            const fNacEl = document.getElementById('add-est-fecha-nac');
+
+            const nombre = nomEl ? nomEl.value.trim().toUpperCase() : "";
+            const cedula = cedEl ? cedEl.value.trim() : "";
+            const correo = corEl ? corEl.value.trim() : "";
+            const repNombre = repNomEl ? repNomEl.value.trim().toUpperCase() : "";
+            const repCedula = repCedEl ? repCedEl.value.trim() : "";
+            const repCelular = repCelEl ? repCelEl.value.trim() : "";
+            const observaciones = obsEl ? obsEl.value.trim() : "";
+            const cursoInput = curEl ? curEl.value.trim() : "";
+            const paraleloInput = parEl ? parEl.value.trim().toUpperCase() : "";
+            const fechaNac = fNacEl ? fNacEl.value : "";
+
+            if (!cedula || !nombre || !cursoInput || !paraleloInput) {
+                mostrarAlertaRapida("Por favor completa los campos esenciales de Cédula, Nómina, Curso y Paralelo.");
                 return;
             }
 
@@ -973,94 +1874,372 @@
                 return;
             }
 
-            estudiantes.push({ "cedula": cedula, "nombre": nombre });
-            guardarNominaEnStorage();
-            construirTablaEstudiantes();
-            actualizarMetricas();
+            // Sanitizar cédula para evitar caracteres extraños en la referencia de Firestore
+            const safeCedula = cedula.trim().replace(/[^a-zA-Z0-9_-]/g, "");
 
-            // Limpiar inputs
-            document.getElementById('add-est-cedula').value = '';
-            document.getElementById('add-est-nombre').value = '';
-            mostrarAlertaRapida("Estudiante agregado exitosamente.");
+            if (!safeCedula) {
+                mostrarAlertaRapida("La cédula contiene caracteres no válidos.");
+                return;
+            }
+
+            const nuevoEstudiante = {
+                nombre,
+                cedula: safeCedula,
+                fechaNac,
+                correo,
+                repNombre,
+                repCedula,
+                repCelular,
+                observaciones,
+                curso: cursoInput,
+                paralelo: paraleloInput
+            };
+
+            try {
+                // Verificar robustamente que safeCedula and appId no estén vacíos antes de escribir
+                if (safeCedula && appId) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'estudiantes_registrados', safeCedula);
+                    await setDoc(docRef, nuevoEstudiante);
+                    
+                    // Forzar actualización local del filtro para que coincida con el nuevo estudiante
+                    cursoFiltrado = cursoInput;
+                    paraleloFiltrado = paraleloInput;
+
+                    // Limpiar formulario
+                    if (nomEl) nomEl.value = '';
+                    if (cedEl) cedEl.value = '';
+                    if (corEl) corEl.value = '';
+                    if (repNomEl) repNomEl.value = '';
+                    if (repCedLoc) repCedLoc.value = ''; // clean old placeholder
+                    if (repCedEl) repCedEl.value = '';
+                    if (repCelEl) repCelEl.value = '';
+                    if (obsEl) obsEl.value = '';
+                    if (curEl) curEl.value = '';
+                    if (parEl) parEl.value = '';
+                    if (fNacEl) fNacEl.value = '';
+                    
+                    mostrarAlertaRapida("Estudiante agregado exitosamente.");
+                }
+            } catch (err) {
+                console.error("Error al registrar alumno:", err);
+                mostrarAlertaRapida("Error de conexión al persistir datos.");
+            }
         }
 
-        // Importación masiva estructurada (Copia y pega desde Excel o CSV)
+        // Lector y cargador masivo de archivos (CSV/Txt)
+        function importarArchivoNomina(event) {
+            // Este método ahora es gestionado por la intermediación del modal de confirmación
+            verificarDatosCursoAntesDeArchivo(event);
+        }
+
+        // Función experta para dividir líneas de CSV autodetectando coma, punto y coma, o tabulador
+        function dividirLineaCSV(linea) {
+            let delimitador = ',';
+            if (linea.includes('\t')) {
+                delimitador = '\t';
+            } else if (linea.includes(';')) {
+                delimitador = ';';
+            }
+            
+            let columnas = [];
+            let dentroDeComillas = false;
+            let columnaActual = '';
+            
+            for (let i = 0; i < linea.length; i++) {
+                let char = linea[i];
+                if (char === '"') {
+                    dentroDeComillas = !dentroDeComillas;
+                } else if (char === delimitador && !dentroDeComillas) {
+                    columnas.push(columnaActual.trim());
+                    columnaActual = '';
+                } else {
+                    columnaActual += char;
+                }
+            }
+            columnas.push(columnaActual.trim());
+            return columnas;
+        }
+
+        // Función para limpiar mojibake del texto en español (Excel ANSI a UTF-8)
+        function limpiarMojibake(texto) {
+            return texto
+                .replace(/Ã‘/g, 'Ñ')
+                .replace(/Ã±/g, 'ñ')
+                .replace(/Ã¡/g, 'á')
+                .replace(/Ã©/g, 'é')
+                .replace(/Ã­/g, 'í')
+                .replace(/Ã³/g, 'ó')
+                .replace(/Ãº/g, 'ú')
+                .replace(/Ã/g, 'Á')
+                .replace(/Ã‰/g, 'É')
+                .replace(/Ã/g, 'Í')
+                .replace(/Ã“/g, 'Ó')
+                .replace(/Ãš/g, 'Ú')
+                .replace(/Ãœ/g, 'Ü')
+                .replace(/Ã¼/g, 'ü');
+        }
+
+        // Procesador unificado para texto pegado e importación de archivos
+        // FORMATO REQUERIDO DE 9 CAMPOS: Ord,Nómina,Cédula,Fecha Nac,Correo Institucional,Nombre Representante,Cédula R,Cel.Representante,Observaciones
+        async function procesarTextoImportacion(textoRaw) {
+            // Asegurar que el usuario de Firebase esté autenticado
+            if (!user) {
+                await initAuth();
+                if (auth.currentUser) user = auth.currentUser;
+                else {
+                    mostrarAlertaRapida("Error de sincronización con la base de datos. Por favor reintenta.");
+                    return;
+                }
+            }
+
+            // Sanitizar la codificación de la Ñ y las tildes rotas por la exportación ANSI de Excel
+            const textoDecodificado = limpiarMojibake(textoRaw);
+            const textoLimpio = textoDecodificado.replace(/^\uFEFF/, "");
+            const lineas = textoLimpio.split(/\r?\n/);
+            
+            // REQUISITO EXPRÉST: Buscar el índice de la línea que comienza exactamente con el Ord. 1 o "1"
+            let inicioIndice = -1;
+            for (let i = 0; i < lineas.length; i++) {
+                const linea = lineas[i].trim();
+                if (!linea) continue;
+                const columnas = dividirLineaCSV(linea);
+                const primerCampo = columnas[0] ? columnas[0].trim() : "";
+                if (primerCampo === "1" || parseInt(primerCampo, 10) === 1) {
+                    inicioIndice = i;
+                    break;
+                }
+            }
+
+            if (inicioIndice === -1) {
+                mostrarAlertaRapida("Error: No se encontró la fila inicial con el Ord. 1 en el archivo.");
+                const fileEl = document.getElementById('file-import-nomina');
+                if (fileEl) fileEl.value = "";
+                archivoTemporal = null;
+                return;
+            }
+
+            let importados = 0;
+            let omitidos = 0;
+
+            for (let i = inicioIndice; i < lineas.length; i++) {
+                const linea = lineas[i].trim();
+                if (!linea) continue;
+
+                // Separar la línea autodetectando delimitador (punto y coma de Excel o coma estándar)
+                let columnas = dividirLineaCSV(linea);
+                
+                if (columnas.length >= 2) {
+                    // Extraer los 9 campos estrictamente definidos por el usuario:
+                    // 0: Ord, 1: Nómina, 2: Cédula, 3: Fecha Nac, 4: Correo Institucional, 5: Nombre Representante, 6: Cédula R, 7: Cel.Representante, 8: Observaciones
+                    let nombre = (columnas[1] || '').trim().replace(/["']/g, "").toUpperCase();
+                    let cedulaRaw = (columnas[2] || '').trim().replace(/["']/g, ""); 
+                    let fechaNac = (columnas[3] || '').trim().replace(/["']/g, "");
+                    let correo = (columnas[4] || '').trim().replace(/["']/g, "");
+                    let repNombre = (columnas[5] || '').trim().replace(/["']/g, "").toUpperCase();
+                    let repCedula = (columnas[6] || '').trim().replace(/["']/g, "");
+                    let repCelular = (columnas[7] || '').trim().replace(/["']/g, "");
+                    let observaciones = (columnas[8] || '').trim().replace(/["']/g, "");
+
+                    // El Curso y Paralelo se configuran mediante el modal antes de subir el archivo
+                    let cursoAsignado = cursoFiltrado;
+                    let paraleloAsignado = paraleloFiltrado;
+
+                    // Limpieza y sanitización robusta de la Cédula (con auto-padding de 0 para arreglar recortes de Excel)
+                    let safeCedula = cedulaRaw.trim().replace(/[^a-zA-Z0-9_-]/g, "");
+                    if (safeCedula.length === 9) {
+                        safeCedula = "0" + safeCedula;
+                    }
+
+                    // Limpieza y auto-padding de cédula del representante
+                    if (repCedula) {
+                        repCedula = repCedula.trim().replace(/[^a-zA-Z0-9_-]/g, "");
+                        if (repCedula.length === 9) {
+                            repCedula = "0" + repCedula;
+                        }
+                    }
+
+                    // Saneamiento de teléfono del representante
+                    if (repCelular) {
+                        repCelular = repCelular.trim().replace(/[^0-9]/g, "");
+                        if (repCelular.length === 9 && repCelular.startsWith("9")) {
+                            repCelular = "0" + repCelular;
+                        }
+                    }
+
+                    if (safeCedula !== "" && nombre !== "") {
+                        try {
+                            // Sincronización robusta en la base de datos cloud de Firestore (Ruta autorizada)
+                            if (safeCedula && appId) {
+                                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'estudiantes_registrados', safeCedula);
+                                await setDoc(docRef, {
+                                    nombre,
+                                    cedula: safeCedula,
+                                    fechaNac,
+                                    correo,
+                                    repNombre,
+                                    repCedula,
+                                    repCelular,
+                                    observaciones,
+                                    curso: cursoAsignado,
+                                    paralelo: paraleloAsignado
+                                });
+                                importados++;
+                            }
+                        } catch (e) {
+                            console.error("Error al escribir registro en Cloud Firestore:", e);
+                            omitidos++;
+                        }
+                    } else {
+                        omitidos++;
+                    }
+                }
+            }
+
+            // Limpiar inputs de archivos
+            const fileEl = document.getElementById('file-import-nomina');
+            if (fileEl) fileEl.value = "";
+            archivoTemporal = null;
+            
+            mostrarAlertaRapida(`¡Importación completada con éxito! Alumnos registrados en ${cursoFiltrado} "${paraleloFiltrado}": ${importados}`);
+        }
+
         function importarListaMasiva() {
-            const rawText = document.getElementById('textarea-importar').value.trim();
+            const rawTextEl = document.getElementById('textarea-importar');
+            const rawText = rawTextEl ? rawTextEl.value.trim() : "";
             if (!rawText) {
                 mostrarAlertaRapida("Pega o escribe datos antes de procesar.");
                 return;
             }
+            procesarTextoImportacion(rawText);
+            if (rawTextEl) rawTextEl.value = '';
+        }
 
-            const lineas = rawText.split('\n');
-            let importados = 0;
-            let omitidos = 0;
+        // Descarga de archivo de ejemplo para guiar al docente en la carga masiva adaptada al nuevo orden
+        function descargarPlantillaCSV() {
+            let plantilla = "Ord,Nómina,Cédula,Fecha Nac,Correo Institucional,Nombre Representante,Cédula R,Cel.Representante,Observaciones\n";
+            plantilla += "1,ALAVA ORTIZ BERTHA ANAHIS,0850812348,2009-12-23,alavaortiz8141@sagradocorazon.edu.ec,ORTIZ MINA YIMMABEL ROCIO,0802348219,0996313327,Sin observaciones\n";
+            plantilla += "2,ALMEIDA MOREIRA XIOMARA RUBY,1350673537,2010-07-09,almeidamoreira8783@sagradocorazon.edu.ec,MONTALVO GARCIA SEGUNDO ARQUIMEDES,0802111260,0985929477,Representante autorizado";
 
-            lineas.forEach(linea => {
-                // Separar por comas o tabuladores
-                let columnas = linea.includes('\t') ? linea.split('\t') : linea.split(',');
-                
-                if (columnas.length >= 2) {
-                    let cedulaRaw = columnas[0].trim();
-                    let nombreRaw = columnas[1].trim().toUpperCase();
+            const encodedUri = encodeURI("data:text/csv;charset=utf-8,\uFEFF" + plantilla);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Plantilla_Ejemplo_SagradoCorazon.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
 
-                    // Limpiar cédula de posibles comillas o espacios extras
-                    cedulaRaw = cedulaRaw.replace(/["']/g, "");
-
-                    if (cedulaRaw !== "" && nombreRaw !== "") {
-                        // Evitar duplicados
-                        if (!estudiantes.some(est => est.cedula === cedulaRaw)) {
-                            estudiantes.push({
-                                "cedula": cedulaRaw,
-                                "nombre": nombreRaw
-                            });
-                            importados++;
-                        } else {
-                            omitidos++;
+        function eliminarEstudiante(cedula) {
+            mostrarConfirmacion(
+                "Confirmar Eliminación",
+                "¿Estás seguro de eliminar a este estudiante de la nómina? Esto deshabilitará su acceso de evaluación de forma permanente.",
+                async () => {
+                    try {
+                        const safeCedula = cedula.trim().replace(/[^a-zA-Z0-9_-]/g, "");
+                        if (safeCedula && appId) {
+                            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'estudiantes_registrados', safeCedula);
+                            await deleteDoc(docRef);
+                            mostrarAlertaRapida("Estudiante retirado de la nómina.");
                         }
+                    } catch (err) {
+                        console.error(err);
+                        mostrarAlertaRapida("Error de red al eliminar el estudiante.");
                     }
                 }
-            });
-
-            if (importados > 0) {
-                guardarNominaEnStorage();
-                construirTablaEstudiantes();
-                actualizarMetricas();
-                document.getElementById('textarea-importar').value = '';
-                mostrarAlertaRapida(`¡Éxito! Se importaron ${importados} estudiantes. (Omitidos: ${omitidos})`);
-            } else {
-                mostrarAlertaRapida("No se procesó ningún registro nuevo. Verifica el formato.");
-            }
+            );
         }
 
-        // Eliminar un estudiante individualmente
-        function eliminarEstudiante(cedula) {
-            if (confirm("¿Estás seguro de eliminar a este estudiante de la nómina? No se eliminarán sus registros de calificación previos.")) {
-                estudiantes = estudiantes.filter(est => est.cedula !== cedula);
-                guardarNominaEnStorage();
-                construirTablaEstudiantes();
-                actualizarMetricas();
-                mostrarAlertaRapida("Estudiante retirado de la nómina.");
-            }
-        }
-
-        // Limpiar toda la nómina de estudiantes en memoria activa
+        // Vaciar la nómina segmentada de estudiantes
         function limpiarNominaCompleta() {
-            if (confirm("¿Seguro que deseas vaciar por completo la nómina de estudiantes? Al hacerlo, ningún alumno podrá ingresar a rendir evaluaciones hasta que cargues nuevos datos.")) {
-                estudiantes = [];
-                guardarNominaEnStorage();
-                construirTablaEstudiantes();
-                actualizarMetricas();
-                mostrarAlertaRapida("Nómina vaciada correctamente.");
-            }
+            mostrarConfirmacion(
+                "Vaciar Nómina Segmentada",
+                `¿Seguro que deseas vaciar por completo la nómina de estudiantes del paralelo seleccionado: ${cursoFiltrado} "${paraleloFiltrado}"? Se eliminarán todos los accesos actuales de este curso.`,
+                async () => {
+                    try {
+                        const alumnosAEliminar = obtenerEstudiantesFiltrados();
+                        for (const est of alumnosAEliminar) {
+                            const safeCedula = est.cedula.trim().replace(/[^a-zA-Z0-9_-]/g, "");
+                            if (safeCedula && appId) {
+                                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'estudiantes_registrados', safeCedula);
+                                await deleteDoc(docRef);
+                            }
+                        }
+                        mostrarAlertaRapida("Nómina del curso vaciada correctamente.");
+                    } catch (err) {
+                        console.error(err);
+                        mostrarAlertaRapida("Error al purgar los registros.");
+                    }
+                }
+            );
         }
 
-        // Navegación de pestañas internas del Admin
+        function limpiarRegistros() {
+            mostrarConfirmacion(
+                "Borrar Historial de Calificaciones Segmentado",
+                `¿Está seguro de que desea eliminar permanentemente todas las notas registradas de ${cursoFiltrado} "${paraleloFiltrado}"? Esto no afectará la lista de estudiantes registrados en la nómina.`,
+                async () => {
+                    try {
+                        const notesToDelete = obtenerCalificacionesFiltradas();
+                        for (const cal of notesToDelete) {
+                            const safeCedula = cal.cedula.trim().replace(/[^a-zA-Z0-9_-]/g, "");
+                            if (safeCedula && appId) {
+                                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'calificaciones_registradas', safeCedula);
+                                await deleteDoc(docRef);
+                            }
+                        }
+                        mostrarAlertaRapida("Historial de calificaciones de este paralelo purgado exitosamente.");
+                    } catch (err) {
+                        console.error(err);
+                        mostrarAlertaRapida("Error de red al limpiar notas.");
+                    }
+                }
+            );
+        }
+
+        async function generarDataSimulada() {
+            const alumnosSegmento = obtenerEstudiantesFiltrados();
+            if (alumnosSegmento.length === 0) {
+                mostrarAlertaRapida("Sube estudiantes a la nómina antes de simular notas.");
+                return;
+            }
+
+            const seleccionados = alumnosSegmento.slice(0, 12);
+            for (let index = 0; index < seleccionados.length; index++) {
+                const est = seleccionados[index];
+                const correctas = Math.floor(Math.random() * 5) + 6; 
+                const d = new Date();
+                d.setMinutes(d.getMinutes() - (15 * index));
+                const pad = (n) => n.toString().padStart(2, '0');
+                const fechaSim = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+                const simDoc = {
+                    cedula: est.cedula,
+                    nombre: est.nombre,
+                    fecha: fechaSim,
+                    correctas: correctas,
+                    nota: parseFloat(((correctas / 10) * 10).toFixed(2))
+                };
+
+                try {
+                    const safeCedula = est.cedula.trim().replace(/[^a-zA-Z0-9_-]/g, "");
+                    if (safeCedula && appId) {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'calificaciones_registradas', safeCedula);
+                        await setDoc(docRef, simDoc);
+                    }
+                } catch (e) {
+                    console.error("Error al guardar registro simulado:", e);
+                }
+            }
+            mostrarAlertaRapida("Calificaciones simuladas y guardadas en la base de datos.");
+        }
+
         function switchAdminTab(tab) {
             const btnCal = document.getElementById('tab-btn-calificaciones');
             const btnEst = document.getElementById('tab-btn-estudiantes');
             const contentCal = document.getElementById('tab-content-calificaciones');
             const contentEst = document.getElementById('tab-content-estudiantes');
+
+            if (!btnCal || !btnEst || !contentCal || !contentEst) return;
 
             if (tab === 'calificaciones') {
                 btnCal.className = "pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-700";
@@ -1077,105 +2256,252 @@
             }
         }
 
-        // Filtrado dinámico en tiempo real
         function filtrarTablaCalificaciones() {
-            const txt = document.getElementById('input-buscar-calificacion').value.toLowerCase();
-            const data = JSON.parse(localStorage.getItem('calificaciones_2c')) || [];
-            
-            const filtrados = data.filter(item => 
-                item.nombre.toLowerCase().includes(txt) || 
-                item.cedula.includes(txt)
-            );
-
+            const inputBuscar = document.getElementById('input-buscar-calificacion');
+            const txt = inputBuscar ? inputBuscar.value.toLowerCase() : "";
+            const calificacionesSegmento = obtenerCalificacionesFiltradas();
+            const filtrados = calificacionesSegmento.filter(item => {
+                const name = item.nombre ? item.nombre.toLowerCase() : "";
+                const idNum = item.cedula ? item.cedula.toLowerCase() : "";
+                return name.includes(txt) || idNum.includes(txt);
+            });
             construirTablaCalificaciones(filtrados);
         }
 
-        // Exportación segura de resultados de curso a CSV compatible con Excel
         function exportarResultadosCSV() {
-            const data = JSON.parse(localStorage.getItem('calificaciones_2c')) || [];
-            if (data.length === 0) {
+            const calificacionesSegmento = obtenerCalificacionesFiltradas();
+            if (calificacionesSegmento.length === 0) {
                 mostrarAlertaRapida("No hay registros para exportar en este momento.");
                 return;
             }
 
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM para acentos en Excel
-            csvContent += "Nro,Estudiante,Cedula,Fecha Registro,Correctas,Nota\n";
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+            csvContent += "Nro,Estudiante,Cedula,Curso/Paralelo,Fecha Registro,Correctas,Nota\n";
 
-            data.forEach((item, index) => {
-                csvContent += `${index + 1},"${item.nombre}","${item.cedula}","${item.fecha}",${item.correctas},${item.nota.toFixed(2)}\n`;
+            calificacionesSegmento.forEach((item, index) => {
+                const estAsociado = estudiantes.find(e => parseInt(e.cedula, 10) === parseInt(item.cedula, 10));
+                const cursoTexto = estAsociado ? `${estAsociado.curso} "${estAsociado.paralelo}"` : `${cursoFiltrado} "${paraleloFiltrado}"`;
+                csvContent += `${index + 1},"${item.nombre}","${item.cedula}","${cursoTexto}","${item.fecha}",${item.correctas},${item.nota.toFixed(2)}\n`;
             });
 
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Reporte_Evaluacion_Diagnostica.csv`);
+            link.setAttribute("download", `Reporte_Evaluacion_${cursoFiltrado}_${paraleloFiltrado}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // Simulación de ingreso de notas aleatorias para probar la interfaz de administración
-        function generarDataSimulada() {
-            if (estudiantes.length === 0) {
-                mostrarAlertaRapida("Sube estudiantes a la nómina antes de simular notas.");
-                return;
-            }
-
-            const dataSimulada = [];
-            // Tomar hasta 12 alumnos de la nómina para ilustrar la simulación
-            const seleccionados = estudiantes.slice(0, 12);
-            
-            seleccionados.forEach((est, index) => {
-                const correctas = Math.floor(Math.random() * 5) + 6; // Notas entre 6 y 10
-                const d = new Date();
-                d.setMinutes(d.getMinutes() - (15 * index));
-                const pad = (n) => n.toString().padStart(2, '0');
-                const fechaSim = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-
-                dataSimulada.push({
-                    cedula: est.cedula,
-                    nombre: est.nombre,
-                    fecha: fechaSim,
-                    correctas: correctas,
-                    nota: parseFloat(((correctas / 10) * 10).toFixed(2))
-                });
-            });
-
-            localStorage.setItem('calificaciones_2c', JSON.stringify(dataSimulada));
-            actualizarMetricas();
-            mostrarAlertaRapida("Calificaciones simuladas correctamente.");
-        }
-
-        // Borrado total de las notas rendidas (reset de prueba)
-        function limpiarRegistros() {
-            if (confirm("¿Está seguro de que desea eliminar permanentemente todas las calificaciones registradas? Esta acción no afectará tu nómina de estudiantes.")) {
-                localStorage.setItem('calificaciones_2c', JSON.stringify([]));
-                actualizarMetricas();
-                mostrarAlertaRapida("Historial de calificaciones purgado exitosamente.");
-            }
-        }
-
-        function mostrarAccesoDocente() {
-            mostrarPantalla('screen-docente-login');
-            document.getElementById('input-clave-docente').focus();
-        }
-
-        function validarAccesoDocente() {
-            const inputClave = document.getElementById('input-clave-docente').value;
-            const errorDiv = document.getElementById('docente-login-error');
-
-            if (inputClave === CLAVE_DOCENTE_MASTER) {
-                errorDiv.classList.add('hidden');
-                inicializarPanelDocente();
-                mostrarPantalla('screen-docente-panel');
-            } else {
-                errorDiv.classList.remove('hidden');
-            }
-        }
-
         function cerrarSesionDocente() {
             volverAlInicio();
         }
+
+
+        // ==============================================
+        // LÓGICA DE INTEGRACIÓN CON GEMINI API (LLM)
+        // ==============================================
+
+        async function llamarGemini(prompt, systemInstruction = "") {
+            const apiKey = ""; // La clave de API se autoinyecta en tiempo de ejecución
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }]
+            };
+            if (systemInstruction) {
+                payload.systemInstruction = { parts: [{ text: systemInstruction }] };
+            }
+
+            let delay = 1000;
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        return result.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudo obtener respuesta del modelo.";
+                    }
+                    
+                    if (response.status === 429 || response.status >= 500) {
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2;
+                        continue;
+                    }
+                    
+                    const errorDetails = await response.json();
+                    throw new Error(errorDetails.error?.message || "Error al llamar a Gemini");
+                } catch (error) {
+                    if (i === 4) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+            throw new Error("Surgió un error tras agotar todos los intentos de conexión.");
+        }
+
+        async function abrirReportePedagogicoIA() {
+            const calificacionesFiltradas = obtenerCalificacionesFiltradas();
+            if (calificacionesFiltradas.length === 0) {
+                mostrarAlertaRapida("Debe haber calificaciones registradas en este paralelo antes de generar el informe.");
+                return;
+            }
+
+            const modal = document.getElementById('ai-report-modal');
+            const loader = document.getElementById('ai-report-loader');
+            const content = document.getElementById('ai-report-content');
+
+            if (modal) modal.classList.remove('hidden');
+            if (loader) loader.classList.remove('hidden');
+            if (content) content.classList.add('hidden');
+
+            const resumenNotas = calificacionesFiltradas.map(c => ({
+                nota: c.nota,
+                fecha: c.fecha
+            }));
+
+            const totalAprobados = calificacionesFiltradas.filter(c => c.nota >= 7.0).length;
+            const tasaAprobacion = ((totalAprobados / calificacionesFiltradas.length) * 100).toFixed(1);
+
+            const prompt = `Analiza los siguientes resultados de evaluaciones diagnósticas del curso ${cursoFiltrado} "${paraleloFiltrado}" de la asignatura Informática Aplicada.
+            
+            DATOS GENERALES DEL CURSO:
+            - Estudiantes Matriculados: ${obtenerEstudiantesFiltrados().length}
+            - Estudiantes Evaluados: ${calificacionesFiltradas.length}
+            - Aprobados (Nota >= 7): ${totalAprobados} (${tasaAprobacion}%)
+            
+            HISTORIAL DE CALIFICACIONES INDIVIDUALES (ANÓNIMO):
+            ${JSON.stringify(resumenNotas)}
+
+            TEMÁTICA DEL CUESTIONARIO (10 Preguntas):
+            1. Seguridad digital (contraseñas complejas)
+            2. Autenticación de identidad
+            3. Uso ético de la Inteligencia Artificial (educación y pensamiento crítico)
+            4. Prácticas seguras para passwords
+            5. Estructura básica web (Inicio-Contenido-Navegación)
+            6. Organización lógica de contenidos digitales
+            7. Coherencia visual y jerarquía web
+            8. Navegabilidad y páginas web funcionales
+            9. Propósito del diseño digital básico
+            10. Pensamiento crítico y validación de información de IA
+
+            Por favor, genera un análisis pedagógico estructurado y detallado para mí (el docente). Incluye:
+            1. Un diagnóstico general del curso (Nivel de competencia general).
+            2. Fortalezas colectivas destacadas.
+            3. Debilidades conceptuales críticas que requieren nivelación prioritaria.
+            4. Un plan estratégico de nivelación con actividades específicas para abordar las falencias del curso.
+            Proporciona tu respuesta con un tono amigable, formal y altamente enfocado en la mejora académica del Sagrado Corazón.`;
+
+            const systemInstruction = "Eres un Asesor Pedagógico y Especialista de Currículo en Ciencias de la Computación e Informática. Escribe con excelente ortografía en español y formato estructurado.";
+
+            try {
+                const respuesta = await llamarGemini(prompt, systemInstruction);
+                if (loader) loader.classList.add('hidden');
+                if (content) {
+                    content.innerText = respuesta;
+                    content.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error(error);
+                if (loader) loader.classList.add('hidden');
+                if (content) {
+                    content.innerText = "Error al conectar con Gemini: " + error.message;
+                    content.classList.remove('hidden');
+                }
+            }
+        }
+
+        function cerrarReportePedagogicoIA() {
+            const modal = document.getElementById('ai-report-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function abrirTutorIA(pregunta, respuestaEstudiante, respuestaCorrecta) {
+            const modal = document.getElementById('ai-tutor-modal');
+            const loader = document.getElementById('ai-tutor-loader');
+            const dialog = document.getElementById('ai-tutor-dialog');
+
+            if (modal) modal.classList.remove('hidden');
+            if (loader) loader.classList.remove('hidden');
+            if (dialog) dialog.classList.add('hidden');
+
+            const prompt = `Ayúdame a entender el concepto de Informática Aplicada en el que fallé en mi evaluación diagnóstica.
+            
+            LA PREGUNTA FUE:
+            "${pregunta}"
+
+            MI RESPUESTA FUE:
+            "${respuestaEstudiante}"
+
+            LA RESPUESTA CORRECTA ES:
+            "${respuestaCorrecta}"
+
+            Por favor, explícame con paciencia el concepto detrás de esta pregunta. Dime por qué mi respuesta no es la ideal y por qué la correcta sí lo es. Mantén la explicación corta (máximo 2 párrafos), utiliza un tono muy amigable y alentador. Al final de tu explicación, hazme una pequeña pregunta interactiva rápida para comprobar si comprendí tu explicación.`;
+
+            const systemInstruction = `Eres el Tutor Virtual de Informática Aplicada de la Unidad Educativa Fiscomisional Sagrado Corazón de Esmeraldas. Tu objetivo es guiar y motivar al estudiante a desarrollar su pensamiento crítico digital de forma empática y reflexiva. Dirígete al estudiante en español de Ecuador de forma respetuosa.`;
+
+            try {
+                const respuesta = await llamarGemini(prompt, systemInstruction);
+                if (loader) loader.classList.add('hidden');
+                if (dialog) {
+                    dialog.innerText = respuesta;
+                    dialog.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error(error);
+                if (loader) loader.classList.add('hidden');
+                if (dialog) {
+                    dialog.innerText = "Lo siento, ha ocurrido un error al conectar con tu tutor virtual: " + error.message;
+                    dialog.classList.remove('hidden');
+                }
+            }
+        }
+
+        function cerrarTutorIA() {
+            const modal = document.getElementById('ai-tutor-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+
+        // Mapeo seguro de funciones asíncronas e interactivas al contexto global (Type Module)
+        window.verificarEstudiante = verificarEstudiante;
+        window.comenzarEvaluacion = comenzarEvaluacion;
+        window.seleccionarOpcion = seleccionarOpcion;
+        window.preguntaSiguiente = preguntaSiguiente;
+        window.volverAlInicio = volverAlInicio;
+        window.mostrarAccesoDocente = mostrarAccesoDocente;
+        window.validarAccesoDocente = validarAccesoDocente;
+        window.switchAdminTab = switchAdminTab;
+        window.filtrarTablaCalificaciones = filtrarTablaCalificaciones;
+        window.exportarResultadosCSV = exportarResultadosCSV;
+        window.generarDataSimulada = generarDataSimulada;
+        window.limpiarRegistros = limpiarRegistros;
+        window.importarListaMasiva = importarListaMasiva;
+        window.agregarEstudianteIndividual = agregarEstudianteIndividual;
+        window.eliminarEstudiante = eliminarEstudiante;
+        window.limpiarNominaCompleta = limpiarNominaCompleta;
+        window.cerrarSesionDocente = cerrarSesionDocente;
+        window.verFichaDetalles = verFichaDetalles;
+        window.cerrarFichaDetalles = cerrarFichaDetalles;
+        window.importarArchivoNomina = importarArchivoNomina;
+        window.descargarPlantillaCSV = descargarPlantillaCSV;
+
+        // Manejadores de intermediación de curso y paralelo
+        window.verificarDatosCursoAntesDeArchivo = verificarDatosCursoAntesDeArchivo;
+        window.verificarDatosCursoAntesDePegar = verificarDatosCursoAntesDePegar;
+        window.cancelarConfiguracionCurso = cancelarConfiguracionCurso;
+        window.confirmarConfiguracionCurso = confirmarConfiguracionCurso;
+        window.cambiarFiltroCursoParalelo = cambiarFiltroCursoParalelo;
+
+        // Manejadores globales para las funciones de Gemini API
+        window.abrirReportePedagogicoIA = abrirReportePedagogicoIA;
+        window.cerrarReportePedagogicoIA = cerrarReportePedagogicoIA;
+        window.abrirTutorIA = abrirTutorIA;
+        window.cerrarTutorIA = cerrarTutorIA;
     </script>
 </body>
 </html>
